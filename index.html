@@ -2,16 +2,42 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Cactus Cantina — Cazador de Bandoleros</title>
 <style>
-  html,body{margin:0;padding:0;background:#1a0a14;color:#f6e2c0;font-family:ui-sans-serif,system-ui,sans-serif}
+  html,body{margin:0;padding:0;background:#1a0a14;color:#f6e2c0;font-family:ui-sans-serif,system-ui,sans-serif;overscroll-behavior:none}
   #wrap{display:flex;flex-direction:column;align-items:center;padding:18px;gap:10px}
-  canvas{display:block;background:#000;border:3px solid #d97742;box-shadow:0 0 40px #d9774255,0 0 10px #000 inset;border-radius:6px}
+  canvas{display:block;background:#000;border:3px solid #d97742;box-shadow:0 0 40px #d9774255,0 0 10px #000 inset;border-radius:6px;max-width:100vw;height:auto}
   h1{margin:2px 0 0;letter-spacing:4px;color:#ffce6b;text-shadow:3px 3px 0 #b13a1a,6px 6px 0 #4a1a10;font-size:26px}
   .hud{font-size:13px;color:#caa57e;max-width:960px;text-align:center;line-height:1.6}
   kbd{background:#3a1c12;padding:2px 7px;border-radius:4px;border:1px solid #ffce6b66;color:#ffce6b;font-family:ui-monospace,Menlo,monospace;font-size:12px}
   .pink{color:#ff6fb3}
   .credit{color:#6b4a36;font-size:11px}
+
+  /* Touch controls */
+  #tc-toggle{position:fixed;top:8px;right:8px;z-index:200;background:#3a1c12;color:#ffce6b;border:1px solid #ffce6b66;border-radius:6px;padding:5px 9px;font-size:16px;cursor:pointer;font-family:inherit}
+  #tc-toggle.on{background:#d97742;color:#1a0a08}
+  #touch-controls{display:none;position:fixed;left:0;right:0;bottom:0;top:0;pointer-events:none;z-index:100;-webkit-user-select:none;user-select:none}
+  .tc-cluster{position:absolute;bottom:14px;display:grid;gap:12px;pointer-events:auto;touch-action:none}
+  .tc-left{left:14px;grid-template-columns:1fr 1fr}
+  .tc-right{right:14px;grid-template-columns:1fr 1fr}
+  .tc-btn{width:64px;height:64px;border-radius:50%;border:2px solid #ffce6b88;background:rgba(58,28,18,.75);color:#ffce6b;font:bold 20px ui-sans-serif,system-ui;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.55);-webkit-tap-highlight-color:transparent;touch-action:none;cursor:pointer;padding:0;line-height:1}
+  .tc-btn .lbl{font-size:9px;font-weight:700;letter-spacing:.5px;opacity:.9;margin-top:2px}
+  .tc-btn.on{background:rgba(217,119,66,.95);transform:scale(.92);border-color:#ffce6b}
+  .tc-btn.shoot{background:rgba(200,50,58,.8);border-color:#ff8fbf;width:76px;height:76px;font-size:24px}
+  .tc-btn.parry{background:rgba(255,111,179,.55)}
+  .tc-btn.super{background:rgba(255,206,107,.55);color:#1a0a08}
+  .tc-btn.jump{background:rgba(58,88,168,.8);color:#fff}
+  .tc-btn.enter{background:rgba(40,100,40,.75);color:#cfe0e8}
+  .tc-btn.dash{background:rgba(120,90,40,.8)}
+  @media (pointer: coarse){
+    #touch-controls{display:block}
+    canvas{max-height:calc(100vh - 24px)}
+    #wrap{padding:4px;gap:2px}
+    h1{font-size:16px}
+    .hud,.credit{display:none}
+  }
+  body.tc-force #touch-controls{display:block}
 </style>
 </head>
 <body>
@@ -24,6 +50,21 @@
     &nbsp;·&nbsp; En el mapa: <kbd>Enter</kbd> pelear · <kbd>Esc</kbd> menú · <kbd>R</kbd> reiniciar partida
   </div>
   <div class="credit">Juego original. 50 jefes inventados a través de 6 biomas + nave alienígena final.</div>
+</div>
+<button id="tc-toggle" title="Mostrar/ocultar controles táctiles">📱</button>
+<div id="touch-controls">
+  <div class="tc-cluster tc-left">
+    <button class="tc-btn left"  data-k="a">◀<span class="lbl">IZQ</span></button>
+    <button class="tc-btn right" data-k="d">▶<span class="lbl">DER</span></button>
+  </div>
+  <div class="tc-cluster tc-right">
+    <button class="tc-btn super" data-k="l">L<span class="lbl">SUPER</span></button>
+    <button class="tc-btn enter" data-k="enter">↵<span class="lbl">ENTER</span></button>
+    <button class="tc-btn parry" data-k="k">K<span class="lbl">PARRY</span></button>
+    <button class="tc-btn jump"  data-k=" ">▲<span class="lbl">SALTAR</span></button>
+    <button class="tc-btn dash"  data-k="shift">»<span class="lbl">DASH</span></button>
+    <button class="tc-btn shoot" data-k="j">●<span class="lbl">DISPARAR</span></button>
+  </div>
 </div>
 <script>
 'use strict';
@@ -1150,6 +1191,28 @@ function loop(){
   if(consume('escape'))state='map';
   requestAnimationFrame(loop);
 }
+
+/* ===== TOUCH CONTROLS ===== */
+(function bindTouch(){
+  const tog=document.getElementById('tc-toggle');
+  if(tog)tog.addEventListener('click',()=>{
+    document.body.classList.toggle('tc-force');
+    tog.classList.toggle('on');
+  });
+  document.querySelectorAll('.tc-btn').forEach(btn=>{
+    const key=btn.dataset.k;
+    function on(e){e.preventDefault();e.stopPropagation();if(!K[key])pressed[key]=true;K[key]=true;btn.classList.add('on');initAudio()}
+    function off(e){if(e){e.preventDefault();e.stopPropagation()}K[key]=false;btn.classList.remove('on')}
+    btn.addEventListener('touchstart',on,{passive:false});
+    btn.addEventListener('touchend',off,{passive:false});
+    btn.addEventListener('touchcancel',off,{passive:false});
+    btn.addEventListener('mousedown',on);
+    btn.addEventListener('mouseup',off);
+    btn.addEventListener('mouseleave',off);
+  });
+  // Prevent the page from scrolling/zooming when interacting with controls
+  document.addEventListener('touchmove',e=>{if(e.target.closest('#touch-controls'))e.preventDefault()},{passive:false});
+})();
 
 state='title';
 requestAnimationFrame(loop);
