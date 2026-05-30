@@ -111,12 +111,12 @@ function resetProgress(){progress={defeated:[],current:1};saveProgress()}
 
 /* ===== BIOMES + BOSS DATA ===== */
 const BIOMES=[
-  {id:0,name:'EL DESIERTO',sub:'Cantina del Sol'},
-  {id:1,name:'LOS CAÑONES',sub:'Gargantas de Sangre'},
-  {id:2,name:'LAS MINAS',sub:'Pozo del Oro Perdido'},
-  {id:3,name:'PUEBLO FANTASMA',sub:'Calle Sin Eco'},
-  {id:4,name:'LA MONTAÑA',sub:'Picos Helados'},
-  {id:5,name:'EL ESPACIO',sub:'Cinturón Estelar'},
+  {id:0,name:'CIUDAD NEÓN',     sub:'Distrito Voltaje'},
+  {id:1,name:'INFIERNO ARDIENTE',sub:'Forja del Pecado'},
+  {id:2,name:'BOSQUE ANCESTRAL', sub:'Raíces Vivas'},
+  {id:3,name:'CRIPTA OSCURA',    sub:'Cámara de los Lamentos'},
+  {id:4,name:'TEMPLO CELESTIAL', sub:'Trono de los Justos'},
+  {id:5,name:'VACÍO ESTELAR',    sub:'Frontera Alienígena'},
 ];
 const NAMES=[
   ['Don Espina','Pinche Alacrán','Coyote Tuerto','Buitre Plata','Gusano Arenoso','Bruja Tumbacactus','Diablo de Polvo','Solco el Eterno'],
@@ -135,11 +135,17 @@ const BODIES=[
   ['meteor','ufo','wraith','scorpion'],
 ];
 const PAL=[
-  [{p:'#2f7a3a',s:'#5a2818',a:'#ffce6b'},{p:'#c8323a',s:'#3a1810',a:'#ffce6b'},{p:'#a87a3a',s:'#3a2010',a:'#ffce6b'}],
-  [{p:'#a04030',s:'#3a1810',a:'#ffce6b'},{p:'#e07a3e',s:'#4a2010',a:'#fff3b0'},{p:'#7a4020',s:'#2a1008',a:'#ffce6b'}],
-  [{p:'#caa57e',s:'#2a1808',a:'#ffce6b'},{p:'#7a6040',s:'#1a1008',a:'#ffdf88'},{p:'#503820',s:'#1a0810',a:'#ffce6b'}],
-  [{p:'#7a9cc0',s:'#1a2030',a:'#cfe0e8'},{p:'#a0a0c0',s:'#2a2030',a:'#ff6fb3'},{p:'#4a3a5a',s:'#1a1020',a:'#cfe0e8'}],
-  [{p:'#cfe0e8',s:'#3a4858',a:'#ff6fb3'},{p:'#7a9090',s:'#202830',a:'#ffce6b'},{p:'#a0b0c0',s:'#303848',a:'#fff3b0'}],
+  // Ciudad Neón: azules/cyan/magenta eléctricos
+  [{p:'#3a8cff',s:'#0a1030',a:'#00f0ff'},{p:'#ff3aa8',s:'#2a0a30',a:'#a0f0ff'},{p:'#a050d0',s:'#0a0a30',a:'#ff6fb3'}],
+  // Infierno: rojos/naranjas/dorados
+  [{p:'#c8323a',s:'#3a0808',a:'#ffce6b'},{p:'#e07a3e',s:'#3a1010',a:'#ffea50'},{p:'#7a1818',s:'#1a0404',a:'#ff8a30'}],
+  // Bosque: verdes/marrones
+  [{p:'#3a8c3a',s:'#1a3a18',a:'#caa57e'},{p:'#7a5a30',s:'#2a1810',a:'#a0c878'},{p:'#5a7a3a',s:'#2a3a20',a:'#ffce6b'}],
+  // Cripta: morados/grises enfermizos
+  [{p:'#7a5a8a',s:'#1a1020',a:'#a0c878'},{p:'#a04050',s:'#2a0810',a:'#cfe0e8'},{p:'#4a3a5a',s:'#1a0a20',a:'#ff6fb3'}],
+  // Templo: dorados/blancos celestes
+  [{p:'#ffd070',s:'#5a4818',a:'#ffffff'},{p:'#e0c890',s:'#3a2818',a:'#fff7c8'},{p:'#cfe0e8',s:'#3a4858',a:'#ffce6b'}],
+  // Vacío: violetas/cosmos
   [{p:'#a050d0',s:'#1a0a30',a:'#ff6fb3'},{p:'#50a0d0',s:'#0a1a30',a:'#ffce6b'},{p:'#d050a0',s:'#2a0a20',a:'#cfe0e8'}],
 ];
 const ATKS_BY_BODY={
@@ -160,63 +166,63 @@ const ATK_DUR={spines:110,tumbleweed:110,stomp:100,strum:130,notes:110,slam:110,
 
 /* 50 hand-crafted bosses. Format: [name, body, palIdx, accessory, hp, size, attackMix, aggression] */
 const BOSS_DATA=[
-  // Desierto (1-8)
-  ['Don Espina',         'cactus',  0,'sombrero', 180,1.20,['spines','tumbleweed','stomp'],            1.00],
-  ['Pinche Alacrán',     'scorpion',1,'crown',    195,0.95,['spines','bombs'],                          1.05],
-  ['Coyote Tuerto',      'vulture', 2,'eyepatch', 210,1.05,['barrage','divebomb'],                      1.05],
-  ['Buitre Plata',       'vulture', 0,'mask',     225,1.10,['divebomb','notes','barrage'],              1.08],
-  ['Gusano Arenoso',     'scorpion',2,'horns',    240,1.20,['spines','stomp','bombs'],                  1.10],
-  ['Bruja Tumbacactus',  'wraith',  1,'tophat',   255,0.90,['petals','tumbleweed','strum'],             1.10],
-  ['Diablo de Polvo',    'wraith',  0,'horns',    270,0.95,['strum','seeds','petals'],                  1.12],
-  ['Solco el Eterno',    'cactus',  1,'flame',    300,1.30,['petals','seeds','notes','stomp'],          1.15],
-  // Cañones (9-16)
-  ['Roca Madre',         'golem',   0,'antenna',  315,1.30,['stomp','slam','petals'],                   1.15],
-  ['Reina Águila',       'vulture', 1,'crown',    325,1.15,['divebomb','barrage','notes'],              1.18],
-  ['Río Susurrante',     'wraith',  2,'mask',     335,1.00,['strum','petals','seeds'],                  1.20],
-  ['Drago Fósil',        'scorpion',0,'horns',    350,1.20,['spines','bombs','slam'],                   1.20],
-  ['Eco Sin Cara',       'wraith',  1,'mask',     360,1.05,['strum','seeds','petals'],                  1.22],
-  ['Lazo Cardenal',      'condor',  2,'bandana',  370,1.10,['divebomb','barrage'],                      1.22],
-  ['Plumaje Roto',       'condor',  0,'eyepatch', 380,1.05,['notes','barrage','divebomb'],              1.24],
-  ['Cara de Piedra',     'golem',   1,'sombrero', 400,1.35,['stomp','slam','petals'],                   1.25],
-  // Minas (17-24)
-  ['Linterna Hueca',     'lantern', 0,'flame',    410,1.10,['notes','petals','barrage'],                1.25],
-  ['Aurum el Pesado',    'golem',   1,'crown',    425,1.30,['stomp','slam','petals'],                   1.28],
-  ['Pólvora Gemelos',    'scorpion',2,'goggles',  435,1.00,['bombs','barrage','spines'],                1.30],
-  ['Cristal Berreante',  'wraith',  0,'antenna',  445,1.05,['strum','petals','notes'],                  1.30],
-  ['Vagón Demente',      'golem',   2,'goggles',  455,1.25,['slam','stomp','bombs'],                    1.32],
-  ['Pico Sangriento',    'scorpion',1,'beard',    470,1.10,['spines','slam','bombs'],                   1.32],
-  ['Carbón Vivo',        'lantern', 1,'horns',    480,1.05,['notes','bombs','petals'],                  1.34],
-  ['Mina Antigua',       'golem',   0,'beard',    500,1.40,['petals','seeds','stomp','slam'],           1.35],
-  // Pueblo Fantasma (25-32)
-  ['Pistolero Sin Sombra','wraith', 0,'sombrero', 510,1.00,['barrage','divebomb','notes'],              1.35],
-  ['Pianola Negra',      'piano',   1,'tophat',   525,1.15,['strum','notes','barrage'],                 1.38],
-  ['Sheriff Difunto',    'wraith',  2,'sombrero', 535,1.00,['barrage','bombs','divebomb'],              1.38],
-  ['Campana Cursada',    'lantern', 0,'crown',    545,1.10,['notes','petals','strum'],                  1.40],
-  ['Bardo Calavera',     'wraith',  1,'mask',     555,0.95,['strum','seeds','notes'],                   1.40],
-  ['Doctora Mortis',     'wraith',  0,'goggles',  570,1.00,['notes','petals','bombs'],                  1.42],
-  ['Croupier Hueso',     'piano',   2,'tophat',   580,1.10,['notes','strum','barrage'],                 1.42],
-  ['Niño del Saloon',    'wraith',  1,'bandana',  595,0.85,['petals','barrage','seeds'],                1.44],
-  // Montaña (33-40)
-  ['Troll Glaciar',      'troll',   0,'horns',    610,1.20,['stomp','slam','bombs'],                    1.45],
-  ['Cóndor Tormenta',    'condor',  1,'crown',    625,1.20,['divebomb','barrage','notes'],              1.45],
-  ['Chamán de Rayos',    'wraith',  2,'antenna',  635,1.05,['strum','petals','laser'],                  1.48],
-  ['Corazón de Lava',    'golem',   0,'flame',    650,1.25,['bombs','petals','slam'],                   1.48],
-  ['Lobo de Niebla',     'wraith',  1,'eyepatch', 660,1.00,['strum','seeds','divebomb'],                1.50],
-  ['Cabra Sin Ojos',     'troll',   2,'horns',    675,1.15,['stomp','divebomb','bombs'],                1.50],
-  ['Alud Salvaje',       'troll',   0,'beard',    690,1.30,['slam','bombs','stomp'],                    1.52],
-  ['Pico Helado',        'golem',   1,'antenna',  710,1.30,['petals','slam','laser'],                   1.55],
-  // Espacio (41-49)
-  ['Meteoro Espadachín', 'meteor',  0,'sword',    720,1.15,['bombs','divebomb','petals'],               1.55],
-  ['Wraith Gravedad',    'wraith',  1,'antenna',  735,1.05,['strum','petals','heartdash'],              1.58],
-  ['Pirata Estelar',     'ufo',     2,'eyepatch', 745,1.10,['laser','barrage','bombs'],                 1.58],
-  ['Sonda Espía',        'ufo',     0,'antenna',  755,0.95,['laser','divebomb','barrage'],              1.60],
-  ['Comando Lunar',      'ufo',     1,'goggles',  770,1.10,['barrage','bombs','divebomb'],              1.60],
-  ['Cazador Cuántico',   'ufo',     2,'antenna',  785,1.05,['laser','petals','heartdash'],              1.62],
-  ['Reina Nebulosa',     'wraith',  0,'crown',    800,1.20,['strum','petals','seeds','laser'],          1.65],
-  ['Sombra Solar',       'meteor',  1,'flame',    820,1.30,['bombs','petals','laser'],                  1.65],
-  ['Centinela Anular',   'ufo',     2,'crown',    850,1.20,['laser','barrage','divebomb','petals'],     1.68],
+  // CIUDAD NEÓN (1-8)
+  ['Volt Centinela',     'golem',   0,'antenna',  180,1.20,['barrage','laser','stomp'],                 1.00],
+  ['Cazador 0X',         'wraith',  1,'goggles',  195,1.00,['barrage','divebomb'],                      1.05],
+  ['Núcleo MK-7',        'golem',   2,'antenna',  210,1.30,['barrage','stomp','petals'],                1.08],
+  ['Drone Carmesí',      'ufo',     1,'antenna',  225,0.95,['laser','divebomb'],                        1.10],
+  ['Sirena de Datos',    'wraith',  0,'antenna',  240,1.05,['strum','petals','laser'],                  1.12],
+  ['Centinela Pesado',   'golem',   1,'crown',    265,1.40,['stomp','slam','barrage'],                  1.15],
+  ['Mente-Red',          'lantern', 0,'antenna',  285,1.10,['notes','petals','laser'],                  1.15],
+  ['Rey de la Estática', 'golem',   2,'crown',    320,1.45,['slam','barrage','laser','petals'],         1.18],
+  // INFIERNO ARDIENTE (9-16)
+  ['Ascua Quemante',     'cactus',  0,'flame',    335,1.10,['spines','petals','bombs'],                 1.18],
+  ['Vampiresa Magma',    'wraith',  1,'horns',    350,1.00,['strum','seeds','bombs'],                   1.20],
+  ['Drago Llamarada',    'vulture', 0,'horns',    370,1.25,['divebomb','barrage','notes'],              1.22],
+  ['Cuerno Infierno',    'scorpion',2,'horns',    385,1.10,['spines','bombs','slam'],                   1.22],
+  ['Espiral de Brasas',  'meteor',  0,'flame',    400,1.15,['bombs','petals','divebomb'],               1.25],
+  ['Cazador de Almas',   'wraith',  2,'mask',     420,1.05,['strum','seeds','petals'],                  1.25],
+  ['Corazón Volcánico',  'meteor',  1,'flame',    440,1.30,['bombs','petals','slam'],                   1.28],
+  ['Belial de Cenizas',  'cactus',  2,'horns',    470,1.40,['petals','bombs','spines','slam'],          1.30],
+  // BOSQUE ANCESTRAL (17-24)
+  ['Raíz Marchita',      'cactus',  0,'sombrero', 485,1.30,['spines','tumbleweed','stomp'],             1.30],
+  ['Lupa Verde',         'condor',  1,'eyepatch', 500,1.00,['divebomb','notes','barrage'],              1.32],
+  ['Druida Mil-Hojas',   'wraith',  2,'crown',    515,1.05,['petals','strum','seeds'],                  1.32],
+  ['Cabra Cornuda',      'troll',   0,'horns',    530,1.20,['stomp','divebomb','slam'],                 1.35],
+  ['Hada Tormentosa',    'wraith',  1,'antenna',  545,0.90,['petals','strum','notes'],                  1.35],
+  ['Lobo de Estación',   'troll',   2,'beard',    560,1.25,['stomp','divebomb','bombs'],                1.38],
+  ['Hongo Susurrante',   'lantern', 0,'flame',    575,1.10,['notes','seeds','petals'],                  1.38],
+  ['Reina del Musgo',    'wraith',  1,'crown',    600,1.20,['petals','seeds','strum','notes'],          1.40],
+  // CRIPTA OSCURA (25-32)
+  ['Conde Vélaris',      'wraith',  0,'tophat',   615,1.05,['strum','seeds','divebomb'],                1.40],
+  ['Bruja Aracne',       'scorpion',1,'tophat',   630,1.10,['spines','bombs','petals'],                 1.42],
+  ['Lich Hueso-Oro',     'wraith',  2,'crown',    645,1.10,['strum','petals','notes','seeds'],          1.42],
+  ['Cuervo del Velo',    'wraith',  0,'mask',     660,1.05,['strum','notes','petals'],                  1.45],
+  ['Sepulturero',        'troll',   1,'beard',    675,1.25,['slam','stomp','bombs'],                    1.45],
+  ['Niño Pálido',        'wraith',  2,'bandana',  690,0.85,['notes','strum','seeds'],                   1.48],
+  ['Madama Plaga',       'wraith',  0,'goggles',  705,1.00,['notes','petals','bombs','seeds'],          1.48],
+  ['Rey Calavera',       'piano',   1,'crown',    730,1.15,['notes','strum','barrage','petals'],        1.50],
+  // TEMPLO CELESTIAL (33-40)
+  ['Centurión Dorado',   'golem',   0,'crown',    745,1.30,['stomp','slam','barrage'],                  1.50],
+  ['Ángel Hoja-Acero',   'condor',  1,'crown',    760,1.20,['divebomb','barrage','notes'],              1.52],
+  ['Paladín de Auroras', 'golem',   2,'sword',    775,1.30,['slam','barrage','petals'],                 1.52],
+  ['Sacerdotisa Luz',    'wraith',  0,'crown',    790,1.05,['strum','petals','notes'],                  1.55],
+  ['Monje del Vacío',    'troll',   1,'bandana',  805,1.10,['stomp','divebomb','slam'],                 1.55],
+  ['Querubín de Hierro', 'golem',   2,'antenna',  820,1.25,['stomp','slam','laser'],                    1.58],
+  ['Gran Maestre',       'troll',   0,'beard',    840,1.30,['slam','bombs','barrage'],                  1.58],
+  ['Sol Naciente',       'meteor',  1,'flame',    860,1.30,['bombs','petals','laser'],                  1.60],
+  // VACÍO ESTELAR (41-49)
+  ['Cazador Xenom',      'scorpion',0,'antenna',  870,1.10,['bombs','spines','petals'],                 1.60],
+  ['Reina Nebulosa',     'wraith',  1,'crown',    885,1.15,['strum','petals','seeds','laser'],          1.62],
+  ['Sonda Eco',          'ufo',     2,'antenna',  895,0.95,['laser','barrage','divebomb'],              1.62],
+  ['Comando Lunar',      'golem',   0,'goggles',  905,1.15,['barrage','bombs','divebomb'],              1.64],
+  ['Mercader Estelar',   'wraith',  1,'goggles',  915,1.05,['strum','petals','notes'],                  1.64],
+  ['Espectro de Pulsar', 'wraith',  2,'antenna',  925,1.05,['strum','petals','heartdash'],              1.66],
+  ['Caballero Cuántico', 'golem',   0,'sword',    935,1.20,['slam','barrage','laser'],                  1.66],
+  ['Vacío Susurrante',   'wraith',  1,'mask',     945,1.10,['strum','petals','seeds'],                  1.68],
+  ['Centinela Anular',   'ufo',     2,'crown',    960,1.25,['laser','barrage','divebomb','petals'],     1.68],
   // Jefe final (50)
-  ['LA NAVE MADRE','mothership',0,'antenna',900,1.60,['barrage','laser','bombs','petals','heartdash','seeds','notes'],1.70],
+  ['LA NAVE MADRE','mothership',0,'antenna',1100,1.65,['barrage','laser','bombs','petals','heartdash','seeds','notes'],1.70],
 ];
 
 function buildConfigs(){
@@ -597,56 +603,147 @@ function updateParticles(){
 
 /* ===== BIOME BACKGROUNDS ===== */
 function drawBgDesert(){
-  const g=X.createLinearGradient(0,0,0,GROUND);g.addColorStop(0,'#2a0d28');g.addColorStop(.45,'#7a2a3c');g.addColorStop(.75,'#e07a3e');g.addColorStop(1,'#ffce6b');
+  // CIUDAD NEÓN — cyberpunk skyline with rain & neon billboards
+  const g=X.createLinearGradient(0,0,0,GROUND);g.addColorStop(0,'#0a0820');g.addColorStop(.5,'#1a0a3a');g.addColorStop(1,'#3a1a5a');
   X.fillStyle=g;X.fillRect(0,0,W,GROUND);
-  X.fillStyle='#fff3b0';X.beginPath();X.arc(W*.65,230,70,0,Math.PI*2);X.fill();
-  X.fillStyle='#ffb56b66';X.beginPath();X.arc(W*.65,230,100,0,Math.PI*2);X.fill();
-  X.fillStyle='#3a1a30';for(let i=0;i<5;i++){const x=(i*200+(timeT*.2)%200)-100;X.fillRect(x,320,140,60);X.fillRect(x+20,300,100,20)}
-  X.fillStyle='#5a2238';for(let i=0;i<4;i++){const x=(i*260+(timeT*.5)%260)-130;X.fillRect(x,360,200,80);X.fillRect(x+30,340,140,20)}
-  X.fillStyle='#2a0f1c';X.fillRect(60,320,180,130);X.beginPath();X.moveTo(50,320);X.lineTo(150,270);X.lineTo(250,320);X.closePath();X.fill();
-  X.fillStyle='#ffce6b';X.fillRect(90,360,18,28);X.fillRect(130,360,18,28);X.fillRect(170,360,18,28);
-  drawGroundDesert();
+  // Distant skyline
+  for(let i=0;i<7;i++){
+    const x=i*150-30,h=150+(i%3)*45,y=GROUND-h;
+    X.fillStyle='#0a0820';X.fillRect(x,y,130,h);
+    for(let r=0;r<6;r++)for(let c=0;c<5;c++){
+      const wx=x+10+c*22,wy=y+12+r*22;
+      const on=((i*7+r*3+c+Math.floor(timeT/20))%5)<3;
+      X.fillStyle=on?(((i+r)%2===0)?'#00f0ff':'#ff3aa8'):'#1a1030';
+      X.fillRect(wx,wy,8,8);
+    }
+  }
+  // Neon billboards
+  X.fillStyle='#ff3aa8';X.fillRect(100,180,90,22);X.fillStyle='#0a0820';X.font='bold 14px ui-monospace,monospace';X.fillText('NEÓN',110,196);
+  X.fillStyle='#00f0ff';X.fillRect(600,140,100,18);X.fillStyle='#0a0820';X.fillText('24/7',618,154);
+  // Moon halo
+  X.fillStyle='#a0f0ff44';X.beginPath();X.arc(W*.78,120,60,0,Math.PI*2);X.fill();
+  X.fillStyle='#cfe0e8';X.beginPath();X.arc(W*.78,120,28,0,Math.PI*2);X.fill();
+  // Rain streaks
+  X.strokeStyle='rgba(160,200,255,.35)';X.lineWidth=1;
+  for(let i=0;i<50;i++){const x=(i*37+timeT*4)%W,y=(i*23+timeT*7)%GROUND;X.beginPath();X.moveTo(x,y);X.lineTo(x-5,y+16);X.stroke()}
+  // Ground (wet street)
+  const gg=X.createLinearGradient(0,GROUND,0,H);gg.addColorStop(0,'#1a0a30');gg.addColorStop(1,'#050010');
+  X.fillStyle=gg;X.fillRect(0,GROUND,W,H-GROUND);
+  X.fillStyle='#ff3aa8';X.fillRect(0,GROUND-3,W,3);
+  // Street puddle reflections
+  for(let i=0;i<6;i++){X.fillStyle=(i%2===0?'#00f0ff':'#ff3aa8')+'44';X.fillRect(60+i*150,GROUND+8,80,2)}
 }
-function drawGroundDesert(){const gg=X.createLinearGradient(0,GROUND,0,H);gg.addColorStop(0,'#3a2018');gg.addColorStop(1,'#1a0a0c');X.fillStyle=gg;X.fillRect(0,GROUND,W,H-GROUND);X.fillStyle='#caa57e';X.fillRect(0,GROUND-3,W,3);}
 function drawBgCanyon(){
-  const g=X.createLinearGradient(0,0,0,GROUND);g.addColorStop(0,'#3a1010');g.addColorStop(.5,'#a04030');g.addColorStop(1,'#e07a3e');
+  // INFIERNO ARDIENTE — lava, embers, dark spires
+  const g=X.createLinearGradient(0,0,0,GROUND);g.addColorStop(0,'#1a0408');g.addColorStop(.4,'#4a1010');g.addColorStop(.8,'#a02818');g.addColorStop(1,'#e07a3e');
   X.fillStyle=g;X.fillRect(0,0,W,GROUND);
-  X.fillStyle='#7a2818';for(let i=0;i<3;i++){const x=i*340-100;X.beginPath();X.moveTo(x,GROUND);X.lineTo(x+60,260);X.lineTo(x+120,290);X.lineTo(x+200,250);X.lineTo(x+340,GROUND);X.closePath();X.fill()}
-  X.fillStyle='#a04030';for(let i=0;i<4;i++){const x=i*280-80;X.beginPath();X.moveTo(x,GROUND);X.lineTo(x+70,330);X.lineTo(x+160,310);X.lineTo(x+220,340);X.lineTo(x+280,GROUND);X.closePath();X.fill()}
-  X.fillStyle='#ffce6b';X.beginPath();X.arc(W*.3,180,40,0,Math.PI*2);X.fill();
-  const gg=X.createLinearGradient(0,GROUND,0,H);gg.addColorStop(0,'#4a1810');gg.addColorStop(1,'#1a0808');X.fillStyle=gg;X.fillRect(0,GROUND,W,H-GROUND);X.fillStyle='#caa57e';X.fillRect(0,GROUND-3,W,3);
+  // Dark spires
+  X.fillStyle='#3a0808';X.beginPath();X.moveTo(0,GROUND);
+  for(let i=0;i<=12;i++){const x=i*W/12,y=240+Math.sin(i*1.3)*60+(i%3)*20;X.lineTo(x,y)}
+  X.lineTo(W,GROUND);X.closePath();X.fill();
+  // Smoke band
+  X.fillStyle='#3a0808cc';X.fillRect(0,200,W,40);
+  // Sun behind smoke
+  X.fillStyle='#ffea50aa';X.beginPath();X.arc(W*.72,160,55,0,Math.PI*2);X.fill();
+  X.fillStyle='#ff8a30';X.beginPath();X.arc(W*.72,160,32,0,Math.PI*2);X.fill();
+  // Floating embers
+  for(let i=0;i<60;i++){const x=(i*51+timeT*.6)%W,y=GROUND-((i*37+timeT*1.2)%GROUND);X.fillStyle=(i%3===0)?'#ffce6b':'#ff8a30';X.fillRect(x,y,2+(i%2),2+(i%2))}
+  // Lava cracks on ground
+  X.fillStyle='#ff8a30';for(let i=0;i<6;i++){const x=i*160+20;X.fillRect(x,GROUND-2,90,4);X.fillRect(x+40,GROUND-6,40,2)}
+  // Ground
+  const gg=X.createLinearGradient(0,GROUND,0,H);gg.addColorStop(0,'#3a1010');gg.addColorStop(1,'#1a0404');
+  X.fillStyle=gg;X.fillRect(0,GROUND,W,H-GROUND);X.fillStyle='#ff8a30';X.fillRect(0,GROUND-3,W,3);
 }
 function drawBgMines(){
-  X.fillStyle='#1a1008';X.fillRect(0,0,W,GROUND);
-  X.fillStyle='#2a1810';X.beginPath();X.moveTo(0,0);X.lineTo(W,0);X.lineTo(W,90);for(let i=W;i>=0;i-=80){X.lineTo(i-40,120+Math.sin(i*.05)*20);X.lineTo(i-80,90)}X.lineTo(0,90);X.closePath();X.fill();
-  X.fillStyle='#3a2010';for(let i=0;i<6;i++){const x=i*180+30;X.fillRect(x,100,10,GROUND-100);X.fillRect(x-6,100,22,10)}
-  for(let i=0;i<25;i++){const x=(i*43+timeT*.3)%W,y=130+(i*37%280);X.fillStyle=i%3===0?'#ff6fb3':'#ffce6b';X.beginPath();X.arc(x,y,2+(i%3),0,Math.PI*2);X.fill();X.fillStyle='#ff6fb344';X.beginPath();X.arc(x,y,6+(i%3),0,Math.PI*2);X.fill()}
-  const gg=X.createLinearGradient(0,GROUND,0,H);gg.addColorStop(0,'#2a1810');gg.addColorStop(1,'#0a0508');X.fillStyle=gg;X.fillRect(0,GROUND,W,H-GROUND);X.fillStyle='#503820';X.fillRect(0,GROUND-3,W,3);
+  // BOSQUE ANCESTRAL — deep green forest with sun rays & fireflies
+  const g=X.createLinearGradient(0,0,0,GROUND);g.addColorStop(0,'#1a3a20');g.addColorStop(.5,'#2a5a30');g.addColorStop(1,'#3a8c3a');
+  X.fillStyle=g;X.fillRect(0,0,W,GROUND);
+  // Trunks
+  X.fillStyle='#3a2010';for(let i=0;i<6;i++){const x=i*170+20;X.fillRect(x,90,28,GROUND-90)}
+  X.fillStyle='#2a1808';for(let i=0;i<6;i++){const x=i*170+20;X.fillRect(x,90,8,GROUND-90)}
+  // Canopy (back layer)
+  X.fillStyle='#1a4a20';for(let i=0;i<8;i++){X.beginPath();X.arc(i*130+40,90,75,0,Math.PI*2);X.fill()}
+  // Canopy (front layer)
+  X.fillStyle='#2a6a30';for(let i=0;i<8;i++){X.beginPath();X.arc(i*130+90,110,55,0,Math.PI*2);X.fill()}
+  // Sun rays through canopy
+  X.fillStyle='#ffea5022';for(let i=0;i<4;i++){const x=i*240+80;X.beginPath();X.moveTo(x,110);X.lineTo(x-40,GROUND);X.lineTo(x+40,GROUND);X.closePath();X.fill()}
+  // Fireflies
+  for(let i=0;i<28;i++){const x=(i*43+timeT*.4)%W,y=210+Math.sin(timeT*.04+i)*50+(i%6)*22;X.fillStyle='#fff7c844';X.beginPath();X.arc(x,y,6,0,Math.PI*2);X.fill();X.fillStyle='#fff7c8';X.beginPath();X.arc(x,y,2,0,Math.PI*2);X.fill()}
+  // Foreground bushes
+  X.fillStyle='#1a3a18';for(let i=0;i<7;i++){const x=i*150+10;X.beginPath();X.arc(x,GROUND-12,32,0,Math.PI*2);X.fill();X.beginPath();X.arc(x+28,GROUND-18,26,0,Math.PI*2);X.fill()}
+  // Ground
+  const gg=X.createLinearGradient(0,GROUND,0,H);gg.addColorStop(0,'#2a3a18');gg.addColorStop(1,'#1a1808');X.fillStyle=gg;X.fillRect(0,GROUND,W,H-GROUND);X.fillStyle='#caa57e';X.fillRect(0,GROUND-3,W,3);
 }
 function drawBgGhost(){
-  const g=X.createLinearGradient(0,0,0,GROUND);g.addColorStop(0,'#1a1830');g.addColorStop(.6,'#4a3a5a');g.addColorStop(1,'#7a9cc0');X.fillStyle=g;X.fillRect(0,0,W,GROUND);
-  X.fillStyle='#cfe0e8';X.beginPath();X.arc(W*.7,160,42,0,Math.PI*2);X.fill();X.fillStyle='#1a1830';X.beginPath();X.arc(W*.7+14,150,38,0,Math.PI*2);X.fill();
-  X.fillStyle='#2a2030';for(let i=0;i<4;i++){const x=i*240+30;X.fillRect(x,300,120,150);X.beginPath();X.moveTo(x-10,300);X.lineTo(x+60,250);X.lineTo(x+130,300);X.closePath();X.fill();X.fillStyle=i%2===0?'#ff6fb333':'#ffce6b33';X.fillRect(x+30,330,20,30);X.fillStyle='#2a2030'}
-  X.fillStyle='#cfe0e833';for(let i=0;i<4;i++){const x=(i*220+timeT*.4)%(W+100)-50,y=200+Math.sin(timeT*.02+i)*20;X.beginPath();X.arc(x,y,24,0,Math.PI*2);X.fill();X.beginPath();X.arc(x+12,y-4,18,0,Math.PI*2);X.fill()}
-  const gg=X.createLinearGradient(0,GROUND,0,H);gg.addColorStop(0,'#2a2030');gg.addColorStop(1,'#0a0810');X.fillStyle=gg;X.fillRect(0,GROUND,W,H-GROUND);X.fillStyle='#7a9cc0';X.fillRect(0,GROUND-3,W,3);
+  // CRIPTA OSCURA — gothic stone, stained glass, candles, mist
+  const g=X.createLinearGradient(0,0,0,GROUND);g.addColorStop(0,'#1a0820');g.addColorStop(.55,'#2a1830');g.addColorStop(1,'#3a2840');X.fillStyle=g;X.fillRect(0,0,W,GROUND);
+  // Stone columns
+  X.fillStyle='#3a2840';for(let i=0;i<5;i++){const x=i*220+60;X.fillRect(x,140,40,GROUND-140);X.fillRect(x-12,140,64,18);X.fillRect(x-12,GROUND-18,64,18)}
+  // Stained glass
+  for(let i=0;i<4;i++){const x=i*220+130,y=180;
+    X.fillStyle='#1a0820';X.fillRect(x-3,y-3,66,146);
+    X.fillStyle='#7a3a4a';X.fillRect(x,y,60,140);
+    X.fillStyle='#a04050';X.fillRect(x+4,y+5,52,40);
+    X.fillStyle='#7a5a8a';X.fillRect(x+4,y+50,52,40);
+    X.fillStyle='#a0c878';X.fillRect(x+4,y+95,52,40);
+    X.strokeStyle='#1a0820';X.lineWidth=2;X.beginPath();X.moveTo(x+30,y);X.lineTo(x+30,y+140);X.stroke();
+  }
+  // Candles glowing
+  for(let i=0;i<9;i++){const x=i*108+18,y=380+Math.sin(timeT*.1+i)*3;
+    X.fillStyle='#ff8a3033';X.beginPath();X.arc(x,y-4,16,0,Math.PI*2);X.fill();
+    X.fillStyle='#5a3a20';X.fillRect(x-3,y,6,30);
+    X.fillStyle='#ff8a30';X.beginPath();X.ellipse(x,y-4,5,9,0,0,Math.PI*2);X.fill();
+    X.fillStyle='#ffce6b';X.beginPath();X.arc(x,y-4,2.5,0,Math.PI*2);X.fill();
+  }
+  // Drifting mist
+  X.fillStyle='#cfe0e822';for(let i=0;i<6;i++){const x=(i*180+timeT*.6)%(W+100)-50,y=GROUND-25;X.beginPath();X.ellipse(x,y,90,16,0,0,Math.PI*2);X.fill()}
+  // Ghost wisps
+  X.fillStyle='#cfe0e833';for(let i=0;i<3;i++){const x=(i*300+timeT*.5)%(W+100)-50,y=240+Math.sin(timeT*.02+i)*18;X.beginPath();X.arc(x,y,22,0,Math.PI*2);X.fill();X.beginPath();X.arc(x+12,y-4,16,0,Math.PI*2);X.fill()}
+  // Ground
+  const gg=X.createLinearGradient(0,GROUND,0,H);gg.addColorStop(0,'#2a1830');gg.addColorStop(1,'#0a0410');X.fillStyle=gg;X.fillRect(0,GROUND,W,H-GROUND);X.fillStyle='#7a5a8a';X.fillRect(0,GROUND-3,W,3);
 }
 function drawBgMountain(){
-  const g=X.createLinearGradient(0,0,0,GROUND);g.addColorStop(0,'#506080');g.addColorStop(.6,'#a0b0c0');g.addColorStop(1,'#cfe0e8');X.fillStyle=g;X.fillRect(0,0,W,GROUND);
-  X.fillStyle='#7a9090';for(let i=0;i<3;i++){const x=i*360-50;X.beginPath();X.moveTo(x,GROUND);X.lineTo(x+150,180);X.lineTo(x+250,230);X.lineTo(x+360,GROUND);X.closePath();X.fill()}
-  X.fillStyle='#cfe0e8';for(let i=0;i<3;i++){const x=i*360-50;X.beginPath();X.moveTo(x+100,260);X.lineTo(x+150,180);X.lineTo(x+200,260);X.closePath();X.fill()}
-  X.fillStyle='#a0b0c0';for(let i=0;i<5;i++){const x=i*220-30;X.beginPath();X.moveTo(x,GROUND);X.lineTo(x+90,320);X.lineTo(x+170,340);X.lineTo(x+220,GROUND);X.closePath();X.fill()}
-  X.fillStyle='#fff';for(let i=0;i<40;i++){const x=(i*31+timeT*.6)%W,y=(i*23+timeT*.4)%GROUND;X.fillRect(x,y,2,2)}
-  const gg=X.createLinearGradient(0,GROUND,0,H);gg.addColorStop(0,'#cfe0e8');gg.addColorStop(1,'#506070');X.fillStyle=gg;X.fillRect(0,GROUND,W,H-GROUND);X.fillStyle='#fff';X.fillRect(0,GROUND-3,W,3);
+  // TEMPLO CELESTIAL — golden columns, sun rays, clouds, sparkles
+  const g=X.createLinearGradient(0,0,0,GROUND);g.addColorStop(0,'#80c0e8');g.addColorStop(.5,'#c0e0f0');g.addColorStop(1,'#fff7c8');X.fillStyle=g;X.fillRect(0,0,W,GROUND);
+  // Sun rays from center
+  X.save();X.translate(W/2,150);
+  for(let i=0;i<14;i++){X.rotate(Math.PI*2/14);X.fillStyle='#fff7c833';X.beginPath();X.moveTo(0,0);X.lineTo(-18,520);X.lineTo(18,520);X.closePath();X.fill()}
+  X.restore();
+  // Drifting clouds
+  X.fillStyle='#fff';for(let i=0;i<5;i++){const x=(i*220+timeT*.3)%(W+250)-120,y=80+i*22;X.beginPath();X.ellipse(x,y,62,18,0,0,Math.PI*2);X.fill();X.beginPath();X.ellipse(x+32,y-6,42,16,0,0,Math.PI*2);X.fill();X.beginPath();X.ellipse(x-22,y-2,32,14,0,0,Math.PI*2);X.fill()}
+  // Sun disc
+  X.fillStyle='#ffea50';X.beginPath();X.arc(W/2,150,58,0,Math.PI*2);X.fill();
+  X.fillStyle='#fff';X.beginPath();X.arc(W/2,150,36,0,Math.PI*2);X.fill();
+  // Golden columns
+  for(let i=0;i<5;i++){const x=i*220+50;
+    X.fillStyle='#ffd070';X.fillRect(x,200,34,GROUND-200);
+    X.fillStyle='#e0b050';X.fillRect(x,200,10,GROUND-200);
+    X.fillStyle='#fff7c8';X.fillRect(x-10,200,54,14);X.fillRect(x-10,GROUND-14,54,14);
+  }
+  // Sparkles
+  for(let i=0;i<32;i++){const x=(i*51+timeT*.4)%W,y=(i*37+timeT*.3)%GROUND;X.fillStyle='#fff7c8';X.fillRect(x,y,2,2)}
+  // Marble floor
+  const gg=X.createLinearGradient(0,GROUND,0,H);gg.addColorStop(0,'#ffd070');gg.addColorStop(1,'#5a4818');X.fillStyle=gg;X.fillRect(0,GROUND,W,H-GROUND);X.fillStyle='#fff7c8';X.fillRect(0,GROUND-3,W,3);
 }
 function drawBgSpace(){
+  // VACÍO ESTELAR — alien void with nebula, planets, crystals
   X.fillStyle='#050010';X.fillRect(0,0,W,GROUND);
-  for(let i=0;i<80;i++){const x=(i*51+timeT*.2)%W,y=(i*37)%GROUND,s=(i%4)+1;X.fillStyle=i%5===0?'#ff6fb3':(i%3===0?'#cfe0e8':'#fff');X.fillRect(x,y,s,s)}
-  // nebula
-  for(let i=0;i<3;i++){X.fillStyle=`hsla(${280+i*30},70%,50%,.15)`;X.beginPath();X.arc(W*(.3+i*.25),200+i*40,180,0,Math.PI*2);X.fill()}
-  // distant planet
-  X.fillStyle='#a050d0';X.beginPath();X.arc(W*.15,140,50,0,Math.PI*2);X.fill();X.fillStyle='#1a0a30';X.beginPath();X.arc(W*.15+12,135,42,0,Math.PI*2);X.fill();
+  // Stars
+  for(let i=0;i<110;i++){const x=(i*51+timeT*.2)%W,y=(i*37)%GROUND,s=(i%4)+1;X.fillStyle=i%5===0?'#ff6fb3':(i%3===0?'#cfe0e8':'#fff');X.fillRect(x,y,s,s)}
+  // Nebula clouds
+  for(let i=0;i<4;i++){X.fillStyle=`hsla(${280+i*30},70%,50%,.18)`;X.beginPath();X.arc(W*(.2+i*.22),180+i*40,190,0,Math.PI*2);X.fill()}
+  // Big ringed planet
+  X.fillStyle='#a050d0';X.beginPath();X.arc(W*.18,150,60,0,Math.PI*2);X.fill();
+  X.fillStyle='#1a0a30';X.beginPath();X.arc(W*.18+15,145,52,0,Math.PI*2);X.fill();
+  X.strokeStyle='#ff6fb3aa';X.lineWidth=3;X.beginPath();X.ellipse(W*.18,150,82,18,.35,0,Math.PI*2);X.stroke();
+  // Small planet
+  X.fillStyle='#50a0d0';X.beginPath();X.arc(W*.85,260,32,0,Math.PI*2);X.fill();X.fillStyle='#1a4a6a';X.beginPath();X.arc(W*.85+8,258,26,0,Math.PI*2);X.fill();
+  // Crystal floor
   X.fillStyle='#ff6fb344';X.fillRect(0,GROUND-12,W,12);
   X.fillStyle='#2a0a30';X.fillRect(0,GROUND,W,H-GROUND);X.fillStyle='#a050d0';X.fillRect(0,GROUND-3,W,3);
+  // Alien spikes
+  X.fillStyle='#a050d0';for(let i=0;i<8;i++){const x=i*120+30;X.beginPath();X.moveTo(x,GROUND);X.lineTo(x+10,GROUND-22);X.lineTo(x+20,GROUND);X.closePath();X.fill()}
+  X.fillStyle='#ff6fb3';for(let i=0;i<8;i++){const x=i*120+33;X.beginPath();X.moveTo(x,GROUND-2);X.lineTo(x+7,GROUND-12);X.lineTo(x+10,GROUND-2);X.closePath();X.fill()}
 }
 const BIOME_BG=[drawBgDesert,drawBgCanyon,drawBgMines,drawBgGhost,drawBgMountain,drawBgSpace];
 
