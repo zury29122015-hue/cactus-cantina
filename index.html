@@ -856,41 +856,237 @@ function drawAccessory(cx,cy,type,palette){
 }
 
 function drawCactus(x,y,p,hit){
-  const main=hit?'#fff':p.p,dark=hit?'#fff':p.s;
-  X.fillStyle=main;rRect(x+40,y+30,80,180,24);X.fill();rRect(x,y+70,30,80,14);X.fill();rRect(x+10,y+50,18,30,9);X.fill();rRect(x+130,y+70,30,80,14);X.fill();rRect(x+132,y+50,18,30,9);X.fill();
-  X.fillStyle=dark;for(let i=0;i<8;i++){X.fillRect(x+50,y+50+i*18,4,6);X.fillRect(x+106,y+50+i*18,4,6)}
-  X.fillStyle='#fff';X.beginPath();X.arc(x+66,y+80,9,0,Math.PI*2);X.fill();X.beginPath();X.arc(x+96,y+80,9,0,Math.PI*2);X.fill();
-  X.fillStyle='#1a0a08';const ang=Math.sin(boss.bob*.6)*2;X.beginPath();X.arc(x+66+ang,y+81,4,0,Math.PI*2);X.fill();X.beginPath();X.arc(x+96+ang,y+81,4,0,Math.PI*2);X.fill();
-  X.fillStyle='#1a0a08';X.beginPath();X.moveTo(x+50,y+108);X.quadraticCurveTo(x+80,y+120,x+110,y+108);X.quadraticCurveTo(x+100,y+118,x+80,y+114);X.quadraticCurveTo(x+60,y+118,x+50,y+108);X.closePath();X.fill();
+  const main=hit?'#fff':p.p,dark=hit?'#fff':p.s,glow=hit?'#fff':p.a;
+  let tg;
+  if(hit) tg='#fff';
+  else {tg=X.createRadialGradient(x+60,y+90,8,x+80,y+150,140);tg.addColorStop(0,'rgba(255,255,255,.4)');tg.addColorStop(.3,main);tg.addColorStop(1,dark)}
+  // Trunk
+  X.fillStyle=tg;
+  X.beginPath();
+  X.moveTo(x+42,y+50);
+  X.bezierCurveTo(x+30,y+30,x+60,y+22,x+80,y+28);
+  X.bezierCurveTo(x+100,y+22,x+130,y+30,x+118,y+50);
+  X.lineTo(x+125,y+200);
+  X.bezierCurveTo(x+128,y+220,x+100,y+222,x+80,y+220);
+  X.bezierCurveTo(x+60,y+222,x+32,y+220,x+35,y+200);
+  X.closePath();X.fill();
+  // Left arm
+  X.beginPath();
+  X.moveTo(x+38,y+85);X.bezierCurveTo(x+10,y+78,x-4,y+100,x+2,y+135);
+  X.bezierCurveTo(x+8,y+150,x+25,y+150,x+25,y+130);X.lineTo(x+38,y+115);X.closePath();X.fill();
+  X.beginPath();X.moveTo(x+8,y+95);X.bezierCurveTo(x+4,y+65,x+26,y+65,x+22,y+95);X.lineTo(x+22,y+108);X.lineTo(x+8,y+108);X.closePath();X.fill();
+  // Right arm
+  X.beginPath();
+  X.moveTo(x+122,y+85);X.bezierCurveTo(x+150,y+78,x+164,y+100,x+158,y+135);
+  X.bezierCurveTo(x+152,y+150,x+135,y+150,x+135,y+130);X.lineTo(x+122,y+115);X.closePath();X.fill();
+  X.beginPath();X.moveTo(x+152,y+95);X.bezierCurveTo(x+156,y+65,x+134,y+65,x+138,y+95);X.lineTo(x+138,y+108);X.lineTo(x+152,y+108);X.closePath();X.fill();
+  // Soft white tufts (instead of dark dashes)
+  X.fillStyle='rgba(255,255,255,.4)';
+  for(let i=0;i<6;i++){X.beginPath();X.arc(x+50,y+58+i*22,2.5,0,Math.PI*2);X.fill();X.beginPath();X.arc(x+110,y+58+i*22,2.5,0,Math.PI*2);X.fill()}
+  // Highlight
+  X.fillStyle='rgba(255,255,255,.25)';
+  X.beginPath();X.ellipse(x+62,y+65,18,32,-.3,0,Math.PI*2);X.fill();
+  // Shadow
+  X.fillStyle='rgba(0,0,0,.18)';
+  X.beginPath();X.ellipse(x+108,y+170,18,42,.2,0,Math.PI*2);X.fill();
+  // Eyes (big)
+  const ang=Math.sin(boss.bob*.6)*2;
+  X.fillStyle='#fff';X.beginPath();X.arc(x+64,y+90,12,0,Math.PI*2);X.fill();X.beginPath();X.arc(x+96,y+90,12,0,Math.PI*2);X.fill();
+  X.fillStyle='#1a0a08';X.beginPath();X.arc(x+64+ang,y+92,5,0,Math.PI*2);X.fill();X.beginPath();X.arc(x+96+ang,y+92,5,0,Math.PI*2);X.fill();
+  X.fillStyle='#fff';X.beginPath();X.arc(x+62+ang,y+90,2,0,Math.PI*2);X.fill();X.beginPath();X.arc(x+94+ang,y+90,2,0,Math.PI*2);X.fill();
+  // Brows
+  X.strokeStyle='#1a0a08';X.lineWidth=3;X.lineCap='round';
+  X.beginPath();X.moveTo(x+54,y+76);X.lineTo(x+72,y+80);X.stroke();
+  X.beginPath();X.moveTo(x+88,y+80);X.lineTo(x+106,y+76);X.stroke();
+  X.lineCap='butt';
+  // Mouth with teeth
+  X.fillStyle='#1a0a08';
+  X.beginPath();
+  X.moveTo(x+58,y+115);X.quadraticCurveTo(x+80,y+135,x+102,y+115);
+  X.quadraticCurveTo(x+95,y+126,x+80,y+128);X.quadraticCurveTo(x+65,y+126,x+58,y+115);
+  X.closePath();X.fill();
+  X.fillStyle='#fff';X.fillRect(x+72,y+120,4,4);X.fillRect(x+84,y+120,4,4);
 }
 function drawScorpion(x,y,p,hit){
-  const main=hit?'#fff':p.p,dark=hit?'#fff':p.s;
-  X.fillStyle=main;rRect(x+30,y+90,100,80,24);X.fill();
-  for(let i=0;i<4;i++){X.beginPath();X.ellipse(x+40+i*22,y+90,16,18,0,0,Math.PI*2);X.fill()}
-  X.fillStyle=main;X.beginPath();X.moveTo(x+30,y+130);X.quadraticCurveTo(x-10,y+60,x+10,y+20);X.quadraticCurveTo(x+30,y+30,x+40,y+90);X.closePath();X.fill();
-  X.fillStyle=p.a;X.beginPath();X.moveTo(x+10,y+20);X.lineTo(x-4,y);X.lineTo(x+22,y+10);X.closePath();X.fill();
-  X.fillStyle=main;X.beginPath();X.ellipse(x+30,y+110,24,18,-.5,0,Math.PI*2);X.fill();X.beginPath();X.ellipse(x+130,y+110,24,18,.5,0,Math.PI*2);X.fill();
-  X.fillStyle=dark;X.beginPath();X.ellipse(x+12,y+112,10,8,-.5,0,Math.PI*2);X.fill();X.beginPath();X.ellipse(x+148,y+112,10,8,.5,0,Math.PI*2);X.fill();
-  X.fillStyle=p.a;X.beginPath();X.arc(x+60,y+115,5,0,Math.PI*2);X.fill();X.beginPath();X.arc(x+100,y+115,5,0,Math.PI*2);X.fill();
-  X.fillStyle='#1a0a08';X.beginPath();X.arc(x+60,y+115,2.5,0,Math.PI*2);X.fill();X.beginPath();X.arc(x+100,y+115,2.5,0,Math.PI*2);X.fill();
+  const main=hit?'#fff':p.p,dark=hit?'#fff':p.s,glow=hit?'#fff':p.a;
+  let tg;
+  if(hit) tg='#fff';
+  else {tg=X.createRadialGradient(x+60,y+100,8,x+80,y+140,120);tg.addColorStop(0,'rgba(255,255,255,.35)');tg.addColorStop(.3,main);tg.addColorStop(1,dark)}
+  // Tail curving back
+  X.fillStyle=tg;
+  X.beginPath();
+  X.moveTo(x+38,y+125);
+  X.bezierCurveTo(x-5,y+95,x-12,y+50,x+10,y+20);
+  X.bezierCurveTo(x+25,y+18,x+32,y+30,x+38,y+50);
+  X.bezierCurveTo(x+42,y+75,x+46,y+100,x+48,y+125);
+  X.closePath();X.fill();
+  X.fillStyle='rgba(0,0,0,.18)';
+  for(let i=0;i<4;i++){const t=i/4,tx=lerp(x+38,x+12,t),ty=lerp(y+125,y+22,t);X.beginPath();X.arc(tx-3,ty,4,0,Math.PI*2);X.fill()}
+  // Stinger
+  X.fillStyle=glow;X.beginPath();X.moveTo(x+10,y+20);X.lineTo(x-6,y-5);X.lineTo(x+24,y+8);X.closePath();X.fill();
+  X.fillStyle='#fff';X.beginPath();X.moveTo(x-2,y-2);X.lineTo(x-6,y-5);X.lineTo(x+2,y);X.closePath();X.fill();
+  // Body
+  X.fillStyle=tg;X.beginPath();X.ellipse(x+80,y+125,55,42,0,0,Math.PI*2);X.fill();
+  X.fillStyle='rgba(0,0,0,.2)';
+  for(let i=0;i<3;i++){X.beginPath();X.ellipse(x+60+i*20,y+125,5,12,0,0,Math.PI*2);X.fill()}
+  // Claw arms
+  X.fillStyle=tg;
+  X.beginPath();X.moveTo(x+35,y+125);X.bezierCurveTo(x+10,y+115,x-5,y+128,x+5,y+148);X.bezierCurveTo(x+18,y+158,x+32,y+150,x+40,y+135);X.closePath();X.fill();
+  X.beginPath();X.ellipse(x+5,y+150,18,12,-.3,0,Math.PI*2);X.fill();
+  X.fillStyle=dark;
+  X.beginPath();X.moveTo(x-8,y+142);X.lineTo(x-15,y+136);X.lineTo(x-3,y+152);X.closePath();X.fill();
+  X.beginPath();X.moveTo(x-5,y+160);X.lineTo(x-13,y+164);X.lineTo(x,y+156);X.closePath();X.fill();
+  X.fillStyle=tg;
+  X.beginPath();X.moveTo(x+125,y+125);X.bezierCurveTo(x+150,y+115,x+165,y+128,x+155,y+148);X.bezierCurveTo(x+142,y+158,x+128,y+150,x+120,y+135);X.closePath();X.fill();
+  X.beginPath();X.ellipse(x+155,y+150,18,12,.3,0,Math.PI*2);X.fill();
+  X.fillStyle=dark;
+  X.beginPath();X.moveTo(x+168,y+142);X.lineTo(x+175,y+136);X.lineTo(x+163,y+152);X.closePath();X.fill();
+  X.beginPath();X.moveTo(x+165,y+160);X.lineTo(x+173,y+164);X.lineTo(x+160,y+156);X.closePath();X.fill();
+  // Highlight
+  X.fillStyle='rgba(255,255,255,.22)';X.beginPath();X.ellipse(x+70,y+108,28,12,-.2,0,Math.PI*2);X.fill();
+  // Multiple eyes (creepy)
+  X.fillStyle=glow;
+  X.beginPath();X.arc(x+60,y+118,6,0,Math.PI*2);X.fill();X.beginPath();X.arc(x+100,y+118,6,0,Math.PI*2);X.fill();
+  X.beginPath();X.arc(x+72,y+110,4,0,Math.PI*2);X.fill();X.beginPath();X.arc(x+88,y+110,4,0,Math.PI*2);X.fill();
+  X.fillStyle='#1a0a08';
+  X.beginPath();X.arc(x+60,y+119,3,0,Math.PI*2);X.fill();X.beginPath();X.arc(x+100,y+119,3,0,Math.PI*2);X.fill();
+  X.beginPath();X.arc(x+72,y+111,2,0,Math.PI*2);X.fill();X.beginPath();X.arc(x+88,y+111,2,0,Math.PI*2);X.fill();
 }
 function drawVulture(x,y,p,hit){
-  const main=hit?'#fff':p.p,dark=hit?'#fff':p.s;
-  X.fillStyle=dark;X.beginPath();X.ellipse(x+80,y+130,80,60,0,0,Math.PI*2);X.fill();
-  X.fillStyle=main;X.beginPath();X.ellipse(x+10,y+100,40,20,-.4+Math.sin(boss.bob*2)*.05,0,Math.PI*2);X.fill();X.beginPath();X.ellipse(x+150,y+100,40,20,.4-Math.sin(boss.bob*2)*.05,0,Math.PI*2);X.fill();
-  X.fillStyle=main;X.beginPath();X.ellipse(x+80,y+80,28,32,0,0,Math.PI*2);X.fill();
-  X.fillStyle=p.a;X.beginPath();X.moveTo(x+80,y+90);X.lineTo(x+110,y+100);X.lineTo(x+80,y+105);X.closePath();X.fill();
-  X.fillStyle='#fff';X.beginPath();X.arc(x+72,y+75,5,0,Math.PI*2);X.fill();X.beginPath();X.arc(x+88,y+75,5,0,Math.PI*2);X.fill();
-  X.fillStyle='#1a0a08';X.beginPath();X.arc(x+73,y+76,2.5,0,Math.PI*2);X.fill();X.beginPath();X.arc(x+89,y+76,2.5,0,Math.PI*2);X.fill();
-  X.fillStyle='#fff';X.beginPath();X.ellipse(x+80,y+55,22,8,0,0,Math.PI*2);X.fill();
+  const main=hit?'#fff':p.p,dark=hit?'#fff':p.s,glow=hit?'#fff':p.a;
+  let bg,wg;
+  if(hit){bg='#fff';wg='#fff'}
+  else{
+    bg=X.createRadialGradient(x+70,y+115,8,x+80,y+150,90);
+    bg.addColorStop(0,'rgba(255,255,255,.3)');bg.addColorStop(.3,dark);bg.addColorStop(1,'#000');
+    wg=X.createLinearGradient(x,y+95,x+160,y+95);
+    wg.addColorStop(0,dark);wg.addColorStop(.5,main);wg.addColorStop(1,dark);
+  }
+  // Body
+  X.fillStyle=bg;X.beginPath();X.ellipse(x+80,y+140,72,55,0,0,Math.PI*2);X.fill();
+  // Wings flapping
+  const wf=Math.sin(boss.bob*2)*.15;
+  X.fillStyle=wg;
+  X.beginPath();
+  X.moveTo(x+30,y+115);X.bezierCurveTo(x-15,y+85,x-30,y+115+wf*20,x-25,y+155-wf*20);
+  X.bezierCurveTo(x-10,y+135,x+15,y+130,x+35,y+135);X.closePath();X.fill();
+  X.strokeStyle='rgba(0,0,0,.3)';X.lineWidth=1.5;
+  for(let i=0;i<5;i++){const t=i/4;X.beginPath();X.moveTo(x+30,y+115);X.lineTo(x-25+t*60,y+145-wf*20+i*4);X.stroke()}
+  X.fillStyle=wg;
+  X.beginPath();
+  X.moveTo(x+130,y+115);X.bezierCurveTo(x+175,y+85,x+190,y+115+wf*20,x+185,y+155-wf*20);
+  X.bezierCurveTo(x+170,y+135,x+145,y+130,x+125,y+135);X.closePath();X.fill();
+  X.strokeStyle='rgba(0,0,0,.3)';X.lineWidth=1.5;
+  for(let i=0;i<5;i++){const t=i/4;X.beginPath();X.moveTo(x+130,y+115);X.lineTo(x+185-t*60,y+145-wf*20+i*4);X.stroke()}
+  // Feathered ruff collar
+  X.fillStyle='#fff';
+  for(let i=-3;i<=3;i++){X.beginPath();X.ellipse(x+80+i*8,y+105,5,9,i*.15,0,Math.PI*2);X.fill()}
+  // Head
+  X.fillStyle=bg;X.beginPath();X.ellipse(x+80,y+75,28,32,0,0,Math.PI*2);X.fill();
+  // Beak hooked
+  X.fillStyle=glow;
+  X.beginPath();
+  X.moveTo(x+80,y+85);X.lineTo(x+115,y+100);
+  X.quadraticCurveTo(x+108,y+108,x+95,y+105);X.quadraticCurveTo(x+85,y+100,x+80,y+100);
+  X.closePath();X.fill();
+  X.fillStyle='rgba(0,0,0,.25)';
+  X.beginPath();X.moveTo(x+95,y+105);X.lineTo(x+110,y+103);X.lineTo(x+108,y+108);X.closePath();X.fill();
+  // Eyes — angry
+  X.fillStyle='#fff';X.beginPath();X.arc(x+68,y+70,7,0,Math.PI*2);X.fill();X.beginPath();X.arc(x+88,y+70,7,0,Math.PI*2);X.fill();
+  X.fillStyle=glow;X.beginPath();X.arc(x+70,y+71,4,0,Math.PI*2);X.fill();X.beginPath();X.arc(x+90,y+71,4,0,Math.PI*2);X.fill();
+  X.fillStyle='#1a0a08';X.beginPath();X.arc(x+71,y+72,2,0,Math.PI*2);X.fill();X.beginPath();X.arc(x+91,y+72,2,0,Math.PI*2);X.fill();
+  // Brows
+  X.strokeStyle='#1a0a08';X.lineWidth=3;X.lineCap='round';
+  X.beginPath();X.moveTo(x+60,y+58);X.lineTo(x+76,y+66);X.stroke();
+  X.beginPath();X.moveTo(x+84,y+66);X.lineTo(x+100,y+58);X.stroke();
+  X.lineCap='butt';
+  // Head highlight
+  X.fillStyle='rgba(255,255,255,.2)';X.beginPath();X.ellipse(x+70,y+58,15,8,-.3,0,Math.PI*2);X.fill();
+}
+
+function drawCondor(x,y,p,hit){
+  const main=hit?'#fff':p.p,dark=hit?'#fff':p.s,glow=hit?'#fff':p.a;
+  let bg,wg;
+  if(hit){bg='#fff';wg='#fff'}
+  else{
+    bg=X.createRadialGradient(x+70,y+125,10,x+80,y+155,80);
+    bg.addColorStop(0,'rgba(255,255,255,.35)');bg.addColorStop(.4,main);bg.addColorStop(1,dark);
+    wg=X.createLinearGradient(x,y+120,x+160,y+120);
+    wg.addColorStop(0,dark);wg.addColorStop(.5,main);wg.addColorStop(1,dark);
+  }
+  X.fillStyle=bg;X.beginPath();X.ellipse(x+80,y+140,60,50,0,0,Math.PI*2);X.fill();
+  // Massive wings
+  const wf=Math.sin(boss.bob*3)*15;
+  X.fillStyle=wg;
+  X.beginPath();
+  X.moveTo(x+30,y+130);X.bezierCurveTo(x-45,y+75+wf,x-50,y+125+wf,x-35,y+175);
+  X.bezierCurveTo(x-10,y+158,x+12,y+148,x+32,y+138);X.closePath();X.fill();
+  X.beginPath();
+  X.moveTo(x+130,y+130);X.bezierCurveTo(x+205,y+75+wf,x+210,y+125+wf,x+195,y+175);
+  X.bezierCurveTo(x+170,y+158,x+148,y+148,x+128,y+138);X.closePath();X.fill();
+  // Wing feathers
+  X.strokeStyle='rgba(0,0,0,.3)';X.lineWidth=1.5;
+  for(let i=0;i<6;i++){const t=i/5;X.beginPath();X.moveTo(x+30,y+130);X.lineTo(x-35+t*65,y+165-wf*.3+i*3);X.stroke()}
+  for(let i=0;i<6;i++){const t=i/5;X.beginPath();X.moveTo(x+130,y+130);X.lineTo(x+195-t*65,y+165-wf*.3+i*3);X.stroke()}
+  // Head
+  X.fillStyle=bg;X.beginPath();X.ellipse(x+80,y+80,30,34,0,0,Math.PI*2);X.fill();
+  // Crest feathers
+  X.fillStyle=glow;
+  X.fillRect(x+72,y+48,4,18);X.fillRect(x+80,y+42,4,24);X.fillRect(x+88,y+48,4,18);
+  // Beak
+  X.fillStyle=glow;
+  X.beginPath();X.moveTo(x+80,y+95);X.lineTo(x+118,y+102);X.lineTo(x+80,y+110);X.closePath();X.fill();
+  X.fillStyle='rgba(0,0,0,.25)';
+  X.beginPath();X.moveTo(x+100,y+108);X.lineTo(x+118,y+102);X.lineTo(x+108,y+110);X.closePath();X.fill();
+  // Eyes
+  X.fillStyle='#fff';X.beginPath();X.arc(x+70,y+75,7,0,Math.PI*2);X.fill();X.beginPath();X.arc(x+90,y+75,7,0,Math.PI*2);X.fill();
+  X.fillStyle=glow;X.beginPath();X.arc(x+72,y+76,4,0,Math.PI*2);X.fill();X.beginPath();X.arc(x+92,y+76,4,0,Math.PI*2);X.fill();
+  X.fillStyle='#1a0a08';X.beginPath();X.arc(x+73,y+77,2,0,Math.PI*2);X.fill();X.beginPath();X.arc(x+93,y+77,2,0,Math.PI*2);X.fill();
+  // Brows
+  X.strokeStyle='#1a0a08';X.lineWidth=3;X.lineCap='round';
+  X.beginPath();X.moveTo(x+62,y+64);X.lineTo(x+78,y+70);X.stroke();
+  X.beginPath();X.moveTo(x+82,y+70);X.lineTo(x+98,y+64);X.stroke();
+  X.lineCap='butt';
+  // Highlight
+  X.fillStyle='rgba(255,255,255,.22)';X.beginPath();X.ellipse(x+70,y+62,14,7,-.3,0,Math.PI*2);X.fill();
 }
 function drawWraith(x,y,p,hit){
-  const main=hit?'#fff':p.p,dark=hit?'#fff':p.s;
-  X.fillStyle=main+'cc';X.beginPath();X.moveTo(x+30,y+200);X.quadraticCurveTo(x,y+100,x+30,y+40);X.quadraticCurveTo(x+80,y,x+130,y+40);X.quadraticCurveTo(x+160,y+100,x+130,y+200);
-  for(let i=0;i<6;i++){const wx=x+30+i*16,wy=y+200+Math.sin(boss.bob*3+i)*8;X.quadraticCurveTo(wx+8,wy+12,wx+16,y+200)}
+  const main=hit?'#fff':p.p,dark=hit?'#fff':p.s,glow=hit?'#fff':p.a;
+  // Aura
+  X.fillStyle=glow+'22';X.beginPath();X.ellipse(x+80,y+125,95,115,0,0,Math.PI*2);X.fill();
+  let bg;
+  if(hit) bg='#fff';
+  else {bg=X.createRadialGradient(x+70,y+55,10,x+80,y+150,140);bg.addColorStop(0,'rgba(255,255,255,.45)');bg.addColorStop(.3,main);bg.addColorStop(1,dark)}
+  // Robe body with wavy tail
+  X.fillStyle=bg;
+  X.beginPath();
+  X.moveTo(x+30,y+90);
+  X.bezierCurveTo(x+15,y+30,x+145,y+30,x+130,y+90);
+  X.bezierCurveTo(x+160,y+130,x+150,y+175,x+135,y+205);
+  for(let i=0;i<5;i++){const wx=x+135-i*30,wy=y+205+Math.sin(boss.bob*3+i)*10;X.quadraticCurveTo(wx-10,wy+15,wx-25,y+205)}
+  X.bezierCurveTo(x+10,y+175,x+0,y+130,x+30,y+90);
   X.closePath();X.fill();
-  X.fillStyle=p.a;X.beginPath();X.arc(x+60,y+80,9,0,Math.PI*2);X.fill();X.beginPath();X.arc(x+100,y+80,9,0,Math.PI*2);X.fill();
-  X.fillStyle=p.a+'66';X.beginPath();X.arc(x+60,y+80,16,0,Math.PI*2);X.fill();X.beginPath();X.arc(x+100,y+80,16,0,Math.PI*2);X.fill();
+  // Hood inner shadow
+  X.fillStyle='rgba(0,0,0,.45)';
+  X.beginPath();
+  X.moveTo(x+35,y+55);X.bezierCurveTo(x+45,y+30,x+115,y+30,x+125,y+55);
+  X.bezierCurveTo(x+118,y+95,x+42,y+95,x+35,y+55);
+  X.closePath();X.fill();
+  // Glowing eye orbs
+  X.fillStyle=glow+'aa';X.beginPath();X.arc(x+60,y+72,18,0,Math.PI*2);X.fill();X.beginPath();X.arc(x+100,y+72,18,0,Math.PI*2);X.fill();
+  X.fillStyle=glow;X.beginPath();X.arc(x+60,y+72,10,0,Math.PI*2);X.fill();X.beginPath();X.arc(x+100,y+72,10,0,Math.PI*2);X.fill();
+  X.fillStyle='#fff';X.beginPath();X.arc(x+58,y+70,4,0,Math.PI*2);X.fill();X.beginPath();X.arc(x+98,y+70,4,0,Math.PI*2);X.fill();
+  // Ghostly mouth
+  X.fillStyle='rgba(0,0,0,.65)';
+  X.beginPath();X.ellipse(x+80,y+105,12,8+Math.sin(boss.bob*2)*3,0,0,Math.PI*2);X.fill();
+  // Robe folds
+  X.strokeStyle='rgba(0,0,0,.25)';X.lineWidth=2;
+  X.beginPath();X.moveTo(x+72,y+130);X.quadraticCurveTo(x+76,y+175,x+72,y+205);X.stroke();
+  X.beginPath();X.moveTo(x+88,y+130);X.quadraticCurveTo(x+84,y+175,x+88,y+205);X.stroke();
+  // Hand wisps
+  X.fillStyle=main+'cc';
+  X.beginPath();X.ellipse(x+25,y+150,12,20,-.3,0,Math.PI*2);X.fill();
+  X.beginPath();X.ellipse(x+135,y+150,12,20,.3,0,Math.PI*2);X.fill();
 }
 function drawGolem(x,y,p,hit){
   const main=hit?'#fff':p.p,dark=hit?'#fff':p.s,glow=hit?'#fff':p.a;
@@ -940,69 +1136,247 @@ function drawGolem(x,y,p,hit){
   X.fillStyle='rgba(0,0,0,.18)';X.beginPath();X.ellipse(x+108,y+190,30,18,.3,0,Math.PI*2);X.fill();
 }
 function drawLantern(x,y,p,hit){
-  const main=hit?'#fff':p.p,dark=hit?'#fff':p.s;
-  X.fillStyle=dark;X.fillRect(x+50,y+10,60,8);X.fillRect(x+76,y,8,15);
-  X.fillStyle=main;rRect(x+40,y+30,80,140,12);X.fill();
-  X.fillStyle=p.a+'aa';rRect(x+50,y+40,60,110,8);X.fill();
-  X.fillStyle='#ff8a30';X.beginPath();X.moveTo(x+80,y+50);X.quadraticCurveTo(x+60,y+90,x+80,y+140);X.quadraticCurveTo(x+100,y+90,x+80,y+50);X.closePath();X.fill();
-  X.fillStyle='#ffce6b';X.beginPath();X.moveTo(x+80,y+70);X.quadraticCurveTo(x+70,y+100,x+80,y+130);X.quadraticCurveTo(x+90,y+100,x+80,y+70);X.closePath();X.fill();
-  X.fillStyle=dark;X.fillRect(x+76,y+78,3,4);X.fillRect(x+84,y+78,3,4);
-  X.fillStyle=dark;X.fillRect(x+40,y+170,80,8);
+  const main=hit?'#fff':p.p,dark=hit?'#fff':p.s,glow=hit?'#fff':p.a;
+  // Outer glow halo
+  X.fillStyle='#ff8a3033';X.beginPath();X.arc(x+80,y+100,90,0,Math.PI*2);X.fill();
+  // Top chain + ring
+  X.fillStyle=dark;X.beginPath();X.arc(x+80,y+5,4,0,Math.PI*2);X.fill();
+  X.strokeStyle=dark;X.lineWidth=2.5;X.beginPath();X.moveTo(x+80,y+8);X.lineTo(x+80,y+22);X.stroke();
+  // Top cap
+  X.fillStyle=dark;X.beginPath();
+  X.moveTo(x+40,y+25);X.lineTo(x+120,y+25);X.lineTo(x+114,y+38);X.lineTo(x+46,y+38);X.closePath();X.fill();
+  // Frame body with gradient
+  let bg;
+  if(hit) bg='#fff';
+  else {bg=X.createRadialGradient(x+70,y+80,10,x+80,y+110,90);bg.addColorStop(0,'rgba(255,206,107,.5)');bg.addColorStop(.5,main);bg.addColorStop(1,dark)}
+  X.fillStyle=bg;
+  X.beginPath();
+  X.moveTo(x+38,y+40);X.lineTo(x+122,y+40);
+  X.bezierCurveTo(x+128,y+90,x+128,y+140,x+118,y+170);
+  X.lineTo(x+42,y+170);
+  X.bezierCurveTo(x+32,y+140,x+32,y+90,x+38,y+40);
+  X.closePath();X.fill();
+  // Glass interior glow
+  X.fillStyle='#ffce6b66';X.beginPath();X.ellipse(x+80,y+105,38,55,0,0,Math.PI*2);X.fill();
+  // Inner flame pulsing
+  const fl=Math.sin(timeT*.3)*4;
+  X.fillStyle='#ff8a30';
+  X.beginPath();X.moveTo(x+80,y+55);X.quadraticCurveTo(x+58,y+90+fl,x+80,y+140);X.quadraticCurveTo(x+102,y+90+fl,x+80,y+55);X.closePath();X.fill();
+  X.fillStyle='#ffce6b';
+  X.beginPath();X.moveTo(x+80,y+70);X.quadraticCurveTo(x+68,y+100+fl,x+80,y+128);X.quadraticCurveTo(x+92,y+100+fl,x+80,y+70);X.closePath();X.fill();
+  X.fillStyle='#fff7c8';X.beginPath();X.arc(x+80,y+102,5,0,Math.PI*2);X.fill();
+  // Hollow eye holes
+  X.fillStyle='#1a0a08';X.beginPath();X.arc(x+68,y+92,5,0,Math.PI*2);X.fill();X.beginPath();X.arc(x+92,y+92,5,0,Math.PI*2);X.fill();
+  X.fillStyle='#fff7c8';X.beginPath();X.arc(x+68,y+92,2.5,0,Math.PI*2);X.fill();X.beginPath();X.arc(x+92,y+92,2.5,0,Math.PI*2);X.fill();
+  // Frowning slit mouth
+  X.fillStyle='#1a0a08';
+  X.beginPath();X.moveTo(x+68,y+115);X.quadraticCurveTo(x+80,y+108,x+92,y+115);X.quadraticCurveTo(x+80,y+118,x+68,y+115);X.closePath();X.fill();
+  // Bottom plate
+  X.fillStyle=dark;
+  X.beginPath();X.moveTo(x+42,y+170);X.lineTo(x+118,y+170);X.lineTo(x+112,y+182);X.lineTo(x+48,y+182);X.closePath();X.fill();
+  // Vertical rib
+  X.fillStyle=dark;X.fillRect(x+78,y+40,4,130);
+  // Highlight
+  X.fillStyle='rgba(255,255,255,.2)';X.beginPath();X.ellipse(x+58,y+70,8,30,-.2,0,Math.PI*2);X.fill();
 }
 function drawPiano(x,y,p,hit){
-  const main=hit?'#fff':p.p,dark=hit?'#fff':p.s;
-  X.fillStyle=dark;rRect(x+10,y+30,160,180,8);X.fill();
-  X.fillStyle='#fff';X.fillRect(x+20,y+170,140,30);
-  X.fillStyle=dark;for(let i=0;i<8;i++)X.fillRect(x+30+i*18,y+170,8,18);
-  X.fillStyle=p.a;X.fillRect(x+10,y+30,160,8);
-  X.fillStyle='#fff';X.beginPath();X.arc(x+60,y+80,12,0,Math.PI*2);X.fill();X.beginPath();X.arc(x+120,y+80,12,0,Math.PI*2);X.fill();
-  X.fillStyle='#1a0a08';X.beginPath();X.arc(x+62,y+82,6,0,Math.PI*2);X.fill();X.beginPath();X.arc(x+122,y+82,6,0,Math.PI*2);X.fill();
-  X.fillStyle=p.a;X.fillRect(x+50,y+120,80,8);
+  const main=hit?'#fff':p.p,dark=hit?'#fff':p.s,glow=hit?'#fff':p.a;
+  let bg;
+  if(hit) bg='#fff';
+  else {bg=X.createLinearGradient(x,y+30,x+180,y+30);bg.addColorStop(0,dark);bg.addColorStop(.5,main);bg.addColorStop(1,dark)}
+  // Body with subtle curve
+  X.fillStyle=bg;
+  X.beginPath();
+  X.moveTo(x+12,y+38);X.bezierCurveTo(x+12,y+28,x+22,y+25,x+30,y+25);
+  X.lineTo(x+150,y+25);X.bezierCurveTo(x+158,y+25,x+168,y+28,x+168,y+38);
+  X.lineTo(x+168,y+212);X.bezierCurveTo(x+168,y+220,x+158,y+222,x+150,y+222);
+  X.lineTo(x+30,y+222);X.bezierCurveTo(x+22,y+222,x+12,y+220,x+12,y+212);
+  X.closePath();X.fill();
+  // Gold molding
+  X.fillStyle=glow;X.fillRect(x+12,y+25,156,12);
+  X.fillStyle='rgba(0,0,0,.3)';X.fillRect(x+12,y+35,156,4);
+  // Candle holders
+  X.fillStyle=dark;X.beginPath();X.arc(x+40,y+22,6,0,Math.PI*2);X.fill();X.beginPath();X.arc(x+140,y+22,6,0,Math.PI*2);X.fill();
+  X.fillStyle='#fff7c8';X.fillRect(x+38,y+10,4,12);X.fillRect(x+138,y+10,4,12);
+  X.fillStyle='#ff8a30';
+  X.beginPath();X.ellipse(x+40,y+8+Math.sin(timeT*.2)*2,3,5,0,0,Math.PI*2);X.fill();
+  X.beginPath();X.ellipse(x+140,y+8+Math.sin(timeT*.2+1)*2,3,5,0,0,Math.PI*2);X.fill();
+  // Sheet music
+  X.fillStyle='#fff';X.fillRect(x+50,y+50,80,40);
+  X.strokeStyle='#1a0a08';X.lineWidth=1;
+  for(let i=0;i<4;i++){X.beginPath();X.moveTo(x+55,y+60+i*7);X.lineTo(x+125,y+60+i*7);X.stroke()}
+  X.fillStyle='#1a0a08';
+  X.beginPath();X.ellipse(x+65,y+72,3,2.5,-.3,0,Math.PI*2);X.fill();X.fillRect(x+67,y+62,1.5,10);
+  X.beginPath();X.ellipse(x+90,y+78,3,2.5,-.3,0,Math.PI*2);X.fill();X.fillRect(x+92,y+68,1.5,10);
+  X.beginPath();X.ellipse(x+115,y+74,3,2.5,-.3,0,Math.PI*2);X.fill();X.fillRect(x+117,y+64,1.5,10);
+  // White keys
+  X.fillStyle='#fff';X.fillRect(x+20,y+175,140,38);
+  X.strokeStyle='#1a0a08';X.lineWidth=1;
+  for(let i=0;i<10;i++){X.beginPath();X.moveTo(x+20+i*14,y+175);X.lineTo(x+20+i*14,y+213);X.stroke()}
+  // Black keys
+  X.fillStyle='#1a0a08';
+  for(let i=0;i<6;i++){const pos=[1,2,4,5,6,8][i];X.fillRect(x+15+pos*14,y+175,7,22)}
+  // Eyes
+  const wob=Math.sin(boss.bob*.6)*2;
+  X.fillStyle='#fff';X.beginPath();X.arc(x+50,y+115,14,0,Math.PI*2);X.fill();X.beginPath();X.arc(x+130,y+115,14,0,Math.PI*2);X.fill();
+  X.fillStyle='#1a0a08';X.beginPath();X.arc(x+50+wob,y+117,7,0,Math.PI*2);X.fill();X.beginPath();X.arc(x+130+wob,y+117,7,0,Math.PI*2);X.fill();
+  X.fillStyle='#fff';X.beginPath();X.arc(x+48+wob,y+115,3,0,Math.PI*2);X.fill();X.beginPath();X.arc(x+128+wob,y+115,3,0,Math.PI*2);X.fill();
+  // Brows
+  X.strokeStyle='#1a0a08';X.lineWidth=3;X.lineCap='round';
+  X.beginPath();X.moveTo(x+38,y+100);X.lineTo(x+60,y+108);X.stroke();
+  X.beginPath();X.moveTo(x+120,y+108);X.lineTo(x+142,y+100);X.stroke();
+  X.lineCap='butt';
+  // Mouth (opening lid)
+  X.fillStyle='#1a0a08';
+  X.beginPath();X.moveTo(x+60,y+145);X.lineTo(x+120,y+145);X.lineTo(x+115,y+165);X.lineTo(x+65,y+165);X.closePath();X.fill();
+  // Side highlight
+  X.fillStyle='rgba(255,255,255,.18)';X.fillRect(x+20,y+38,8,170);
 }
 function drawTroll(x,y,p,hit){
-  const main=hit?'#fff':p.p,dark=hit?'#fff':p.s;
-  X.fillStyle=main;rRect(x+20,y+60,140,150,20);X.fill();
-  X.fillStyle=dark;X.beginPath();X.moveTo(x+30,y+70);X.lineTo(x+10,y+50);X.lineTo(x+40,y+58);X.closePath();X.fill();X.beginPath();X.moveTo(x+150,y+70);X.lineTo(x+170,y+50);X.lineTo(x+140,y+58);X.closePath();X.fill();
-  X.fillStyle=main;X.beginPath();X.ellipse(x+90,y+50,40,30,0,0,Math.PI*2);X.fill();
-  X.fillStyle='#fff';X.beginPath();X.arc(x+74,y+48,7,0,Math.PI*2);X.fill();X.beginPath();X.arc(x+106,y+48,7,0,Math.PI*2);X.fill();
-  X.fillStyle='#1a0a08';X.beginPath();X.arc(x+75,y+50,3.5,0,Math.PI*2);X.fill();X.beginPath();X.arc(x+107,y+50,3.5,0,Math.PI*2);X.fill();
-  X.fillStyle=p.a;X.beginPath();X.moveTo(x+78,y+58);X.lineTo(x+102,y+58);X.lineTo(x+98,y+68);X.lineTo(x+82,y+68);X.closePath();X.fill();
-  X.fillStyle=dark;X.fillRect(x+0,y+120,30,60);X.fillRect(x+150,y+120,30,60);
+  const main=hit?'#fff':p.p,dark=hit?'#fff':p.s,glow=hit?'#fff':p.a;
+  let bg;
+  if(hit) bg='#fff';
+  else {bg=X.createRadialGradient(x+70,y+90,10,x+90,y+150,140);bg.addColorStop(0,'rgba(255,255,255,.3)');bg.addColorStop(.3,main);bg.addColorStop(1,dark)}
+  // Body
+  X.fillStyle=bg;
+  X.beginPath();
+  X.moveTo(x+25,y+85);X.bezierCurveTo(x+10,y+105,x+10,y+150,x+25,y+175);
+  X.bezierCurveTo(x+15,y+205,x+30,y+220,x+50,y+218);
+  X.lineTo(x+130,y+218);
+  X.bezierCurveTo(x+150,y+220,x+165,y+205,x+155,y+175);
+  X.bezierCurveTo(x+170,y+150,x+170,y+105,x+155,y+85);
+  X.bezierCurveTo(x+140,y+72,x+40,y+72,x+25,y+85);
+  X.closePath();X.fill();
+  // Head
+  X.fillStyle=bg;X.beginPath();X.ellipse(x+90,y+52,42,38,0,0,Math.PI*2);X.fill();
+  // Horns
+  X.fillStyle=dark;
+  X.beginPath();X.moveTo(x+58,y+28);X.lineTo(x+44,y+0);X.lineTo(x+70,y+18);X.closePath();X.fill();
+  X.beginPath();X.moveTo(x+122,y+28);X.lineTo(x+136,y+0);X.lineTo(x+110,y+18);X.closePath();X.fill();
+  X.fillStyle='rgba(255,255,255,.25)';
+  X.beginPath();X.moveTo(x+50,y+12);X.lineTo(x+48,y+4);X.lineTo(x+55,y+12);X.closePath();X.fill();
+  X.beginPath();X.moveTo(x+130,y+12);X.lineTo(x+132,y+4);X.lineTo(x+125,y+12);X.closePath();X.fill();
+  // Heavy brows
+  X.fillStyle=dark;
+  X.beginPath();X.ellipse(x+74,y+40,13,5,-.2,0,Math.PI*2);X.fill();
+  X.beginPath();X.ellipse(x+106,y+40,13,5,.2,0,Math.PI*2);X.fill();
+  // Eyes — small mean
+  X.fillStyle='#fff';X.beginPath();X.arc(x+74,y+50,8,0,Math.PI*2);X.fill();X.beginPath();X.arc(x+106,y+50,8,0,Math.PI*2);X.fill();
+  const ang=Math.sin(boss.bob*.6)*2;
+  X.fillStyle=glow;X.beginPath();X.arc(x+74+ang,y+51,4,0,Math.PI*2);X.fill();X.beginPath();X.arc(x+106+ang,y+51,4,0,Math.PI*2);X.fill();
+  X.fillStyle='#1a0a08';X.beginPath();X.arc(x+75+ang,y+52,2,0,Math.PI*2);X.fill();X.beginPath();X.arc(x+107+ang,y+52,2,0,Math.PI*2);X.fill();
+  // Nose
+  X.fillStyle='rgba(0,0,0,.3)';X.beginPath();X.ellipse(x+90,y+62,5,8,0,0,Math.PI*2);X.fill();
+  // Mouth with fangs
+  X.fillStyle='#1a0a08';
+  X.beginPath();
+  X.moveTo(x+72,y+75);X.lineTo(x+108,y+75);
+  X.quadraticCurveTo(x+100,y+90,x+80,y+90);X.quadraticCurveTo(x+75,y+86,x+72,y+75);
+  X.closePath();X.fill();
+  X.fillStyle='#fff';
+  X.beginPath();X.moveTo(x+78,y+78);X.lineTo(x+82,y+78);X.lineTo(x+80,y+88);X.closePath();X.fill();
+  X.beginPath();X.moveTo(x+98,y+78);X.lineTo(x+102,y+78);X.lineTo(x+100,y+88);X.closePath();X.fill();
+  // Chest detail
+  X.fillStyle='rgba(0,0,0,.2)';
+  X.beginPath();X.moveTo(x+90,y+100);X.lineTo(x+85,y+170);X.lineTo(x+95,y+170);X.closePath();X.fill();
+  // Big arms
+  X.fillStyle=bg;
+  X.beginPath();X.ellipse(x+10,y+140,18,42,-.1,0,Math.PI*2);X.fill();
+  X.beginPath();X.ellipse(x+170,y+140,18,42,.1,0,Math.PI*2);X.fill();
+  // Fists
+  X.fillStyle=dark;
+  X.beginPath();X.arc(x+8,y+184,16,0,Math.PI*2);X.fill();
+  X.beginPath();X.arc(x+172,y+184,16,0,Math.PI*2);X.fill();
+  X.fillStyle='rgba(0,0,0,.3)';
+  X.fillRect(x+0,y+182,16,4);X.fillRect(x+164,y+182,16,4);
+  // Shoulder highlight
+  X.fillStyle='rgba(255,255,255,.22)';
+  X.beginPath();X.ellipse(x+55,y+90,18,10,-.3,0,Math.PI*2);X.fill();
 }
-function drawCondor(x,y,p,hit){
-  const main=hit?'#fff':p.p,dark=hit?'#fff':p.s;
-  X.fillStyle=main;X.beginPath();X.ellipse(x+80,y+140,60,50,0,0,Math.PI*2);X.fill();
-  const wf=Math.sin(boss.bob*3)*15;
-  X.fillStyle=dark;X.beginPath();X.moveTo(x+30,y+130);X.quadraticCurveTo(x-40,y+80+wf,x-30,y+170);X.quadraticCurveTo(x+10,y+150,x+30,y+130);X.closePath();X.fill();
-  X.beginPath();X.moveTo(x+130,y+130);X.quadraticCurveTo(x+200,y+80+wf,x+190,y+170);X.quadraticCurveTo(x+150,y+150,x+130,y+130);X.closePath();X.fill();
-  X.fillStyle=main;X.beginPath();X.ellipse(x+80,y+80,30,32,0,0,Math.PI*2);X.fill();
-  X.fillStyle=p.a;X.beginPath();X.moveTo(x+80,y+95);X.lineTo(x+115,y+102);X.lineTo(x+80,y+108);X.closePath();X.fill();
-  X.fillStyle='#fff';X.beginPath();X.arc(x+70,y+75,6,0,Math.PI*2);X.fill();X.beginPath();X.arc(x+90,y+75,6,0,Math.PI*2);X.fill();
-  X.fillStyle='#1a0a08';X.beginPath();X.arc(x+72,y+76,3,0,Math.PI*2);X.fill();X.beginPath();X.arc(x+92,y+76,3,0,Math.PI*2);X.fill();
-  X.fillStyle=p.a;X.fillRect(x+72,y+50,4,16);X.fillRect(x+80,y+44,4,22);X.fillRect(x+88,y+50,4,16);
-}
+// (drawCondor moved earlier and polished — this slot intentionally empty)
 function drawMeteor(x,y,p,hit){
-  const main=hit?'#fff':p.p,dark=hit?'#fff':p.s;
-  X.fillStyle=main;X.beginPath();X.arc(x+80,y+110,70,0,Math.PI*2);X.fill();
-  X.fillStyle=dark;for(let i=0;i<8;i++){const a=i*Math.PI/4+boss.bob*.1,r=60,cx=x+80+Math.cos(a)*r,cy=y+110+Math.sin(a)*r;X.beginPath();X.arc(cx,cy,10,0,Math.PI*2);X.fill()}
-  X.fillStyle='#ff8a30';X.beginPath();X.arc(x+80,y+110,40,0,Math.PI*2);X.fill();
-  X.fillStyle='#ffce6b';X.beginPath();X.arc(x+80,y+110,20,0,Math.PI*2);X.fill();
-  X.fillStyle='#1a0a08';X.beginPath();X.arc(x+68,y+108,4,0,Math.PI*2);X.fill();X.beginPath();X.arc(x+92,y+108,4,0,Math.PI*2);X.fill();
-  X.strokeStyle='#1a0a08';X.lineWidth=2;X.beginPath();X.moveTo(x+72,y+120);X.quadraticCurveTo(x+80,y+125,x+88,y+120);X.stroke();
-  // orbiting rocks
-  for(let i=0;i<4;i++){const a=boss.bob*2+i*Math.PI/2,r=100,cx=x+80+Math.cos(a)*r,cy=y+110+Math.sin(a)*r*.4;X.fillStyle=dark;X.beginPath();X.arc(cx,cy,8,0,Math.PI*2);X.fill()}
+  const main=hit?'#fff':p.p,dark=hit?'#fff':p.s,glow=hit?'#fff':p.a;
+  // Outer fire glow
+  X.fillStyle='#ff8a3022';X.beginPath();X.arc(x+80,y+110,90,0,Math.PI*2);X.fill();
+  // Rock body with gradient
+  let bg;
+  if(hit) bg='#fff';
+  else {bg=X.createRadialGradient(x+60,y+85,10,x+80,y+115,80);bg.addColorStop(0,'rgba(255,255,255,.35)');bg.addColorStop(.3,main);bg.addColorStop(1,dark)}
+  X.fillStyle=bg;X.beginPath();X.arc(x+80,y+110,70,0,Math.PI*2);X.fill();
+  // Crater bumps
+  X.fillStyle='rgba(0,0,0,.25)';
+  for(let i=0;i<5;i++){const a=i*1.3+boss.bob*.1,r=45;X.beginPath();X.arc(x+80+Math.cos(a)*r,y+110+Math.sin(a)*r,6,0,Math.PI*2);X.fill()}
+  // Cracks around edges
+  X.fillStyle=dark;
+  for(let i=0;i<8;i++){const a=i*Math.PI/4+boss.bob*.1;X.beginPath();X.arc(x+80+Math.cos(a)*60,y+110+Math.sin(a)*60,10,0,Math.PI*2);X.fill()}
+  // Inner molten core
+  const cg=X.createRadialGradient(x+80,y+110,5,x+80,y+110,40);
+  cg.addColorStop(0,'#fff7c8');cg.addColorStop(.4,'#ffce6b');cg.addColorStop(1,'#ff8a30');
+  X.fillStyle=cg;X.beginPath();X.arc(x+80,y+110,40,0,Math.PI*2);X.fill();
+  // Eyes (glowing slits)
+  X.fillStyle='#1a0a08';
+  X.beginPath();X.ellipse(x+68,y+105,7,4,0,0,Math.PI*2);X.fill();
+  X.beginPath();X.ellipse(x+92,y+105,7,4,0,0,Math.PI*2);X.fill();
+  X.fillStyle='#fff';
+  X.beginPath();X.arc(x+68,y+105,2,0,Math.PI*2);X.fill();X.beginPath();X.arc(x+92,y+105,2,0,Math.PI*2);X.fill();
+  // Mouth (jagged grin)
+  X.strokeStyle='#1a0a08';X.lineWidth=2.5;X.lineCap='round';
+  X.beginPath();X.moveTo(x+68,y+125);X.lineTo(x+72,y+118);X.lineTo(x+76,y+125);X.lineTo(x+80,y+118);X.lineTo(x+84,y+125);X.lineTo(x+88,y+118);X.lineTo(x+92,y+125);X.stroke();
+  X.lineCap='butt';
+  // Orbiting rocks
+  for(let i=0;i<4;i++){
+    const a=boss.bob*2+i*Math.PI/2,r=105,cx=x+80+Math.cos(a)*r,cy=y+110+Math.sin(a)*r*.4;
+    X.fillStyle=dark;X.beginPath();X.arc(cx,cy,9,0,Math.PI*2);X.fill();
+    X.fillStyle='rgba(255,255,255,.3)';X.beginPath();X.arc(cx-2,cy-2,3,0,Math.PI*2);X.fill();
+  }
+  // Top highlight on rock
+  X.fillStyle='rgba(255,255,255,.18)';X.beginPath();X.ellipse(x+60,y+78,18,12,-.3,0,Math.PI*2);X.fill();
 }
+
 function drawUFO(x,y,p,hit){
-  const main=hit?'#fff':p.p,dark=hit?'#fff':p.s;
-  X.fillStyle=main+'44';X.beginPath();X.ellipse(x+80,y+160,80,16,0,0,Math.PI*2);X.fill();
-  X.fillStyle=dark;X.beginPath();X.ellipse(x+80,y+120,90,30,0,0,Math.PI*2);X.fill();
-  X.fillStyle=main;X.beginPath();X.ellipse(x+80,y+115,80,22,0,0,Math.PI*2);X.fill();
-  X.fillStyle=p.a;X.beginPath();X.ellipse(x+80,y+95,40,30,0,Math.PI,Math.PI*2);X.fill();
-  X.fillStyle=p.a+'66';X.beginPath();X.arc(x+80,y+90,16,0,Math.PI*2);X.fill();
-  X.fillStyle='#fff';X.beginPath();X.arc(x+80,y+88,8,0,Math.PI*2);X.fill();
-  // lights
-  for(let i=0;i<5;i++){const blink=(Math.floor(timeT/8)+i)%2===0;X.fillStyle=blink?p.a:'#000';X.beginPath();X.arc(x+30+i*25,y+125,4,0,Math.PI*2);X.fill()}
+  const main=hit?'#fff':p.p,dark=hit?'#fff':p.s,glow=hit?'#fff':p.a;
+  // Beam glow underneath
+  X.fillStyle=glow+'33';
+  X.beginPath();X.moveTo(x+50,y+140);X.lineTo(x+110,y+140);X.lineTo(x+135,y+200);X.lineTo(x+25,y+200);X.closePath();X.fill();
+  // Shadow under
+  X.fillStyle=main+'44';X.beginPath();X.ellipse(x+80,y+165,80,14,0,0,Math.PI*2);X.fill();
+  // Lower hull
+  let bg;
+  if(hit) bg='#fff';
+  else {bg=X.createLinearGradient(x,y+120,x,y+150);bg.addColorStop(0,main);bg.addColorStop(1,dark)}
+  X.fillStyle=bg;
+  X.beginPath();X.ellipse(x+80,y+128,92,32,0,0,Math.PI*2);X.fill();
+  // Mid band (lighter)
+  X.fillStyle=main;
+  X.beginPath();X.ellipse(x+80,y+118,82,18,0,0,Math.PI*2);X.fill();
+  // Upper dome with radial gradient
+  let dg;
+  if(hit) dg='#fff';
+  else {dg=X.createRadialGradient(x+70,y+90,5,x+80,y+105,45);dg.addColorStop(0,'#fff');dg.addColorStop(.5,glow);dg.addColorStop(1,dark)}
+  X.fillStyle=dg;
+  X.beginPath();X.ellipse(x+80,y+95,40,28,0,Math.PI,Math.PI*2);X.fill();
+  // Pilot silhouette inside dome
+  X.fillStyle='rgba(0,0,0,.4)';
+  X.beginPath();X.ellipse(x+80,y+95,12,14,0,Math.PI,Math.PI*2);X.fill();
+  // Pilot eyes glowing
+  X.fillStyle=glow;
+  X.beginPath();X.arc(x+74,y+90,2.5,0,Math.PI*2);X.fill();
+  X.beginPath();X.arc(x+86,y+90,2.5,0,Math.PI*2);X.fill();
+  // Dome reflection
+  X.fillStyle='rgba(255,255,255,.5)';
+  X.beginPath();X.ellipse(x+65,y+82,8,4,-.4,0,Math.PI*2);X.fill();
+  // Blinking lights along rim
+  for(let i=0;i<7;i++){
+    const blink=(Math.floor(timeT/8)+i)%2===0;
+    X.fillStyle=blink?glow:'#1a0a14';
+    X.beginPath();X.arc(x+20+i*20,y+130,4.5,0,Math.PI*2);X.fill();
+    if(blink){X.fillStyle=glow+'66';X.beginPath();X.arc(x+20+i*20,y+130,8,0,Math.PI*2);X.fill()}
+  }
+  // Detail seam
+  X.strokeStyle='rgba(0,0,0,.3)';X.lineWidth=1.5;
+  X.beginPath();X.ellipse(x+80,y+118,82,18,0,0,Math.PI*2);X.stroke();
 }
+// (drawUFO moved earlier and polished — this slot intentionally empty)
 function drawMothership(){
   const x=boss.x,y=boss.y,p=boss.palette,hit=boss.hitFlash>0;
   const main=hit?'#fff':p.p,dark=hit?'#fff':p.s;
