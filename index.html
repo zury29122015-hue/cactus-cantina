@@ -226,6 +226,15 @@ const BOSS_DATA=[
   ['LA NAVE MADRE','mothership',0,'antenna',1200,1.65,['barrage','laser','bombs','petals','heartdash','seeds','notes'],1.70],
 ];
 
+// Aura assignment — biome-themed primary + variety via id
+const AURA_POOLS=[
+  ['electric','spark','smoke'],   // Neón
+  ['fire','smoke','spark'],       // Infierno
+  ['leaf','spark','smoke'],       // Bosque
+  ['void','smoke','spark'],       // Cripta
+  ['halo','spark','electric'],    // Templo
+  ['void','electric','spark'],    // Vacío
+];
 function buildConfigs(){
   return BOSS_DATA.map((d,i)=>{
     const id=i+1;
@@ -233,9 +242,13 @@ function buildConfigs(){
     const isFinal=(id===50);
     const [name,bodyType,palIdx,accessory,hp,size,attackMix,aggression]=d;
     const palette=PAL[biome][palIdx]||PAL[biome][0];
-    // Super damage ratio: linearly decays from .50 (boss 1) to .12 (boss 50)
     const superRatio=lerp(0.50,0.12,(id-1)/49);
-    return {id,name,biome,bodyType,palette,attackMix,hp,size,isFinal,accessory,aggression,superRatio};
+    // Pick aura deterministically per boss (varies within biome)
+    const pool=AURA_POOLS[biome];
+    const aura=isFinal?'void':pool[(id+bodyType.length)%pool.length];
+    // Per-boss attack count multiplier (0.7..1.6) — gives spread to projectile counts
+    const atkCount=0.7+((id*7)%10)/10;
+    return {id,name,biome,bodyType,palette,attackMix,hp,size,isFinal,accessory,aggression,superRatio,aura,atkCount};
   });
 }
 const CFGS=buildConfigs();
@@ -753,6 +766,84 @@ const BIOME_BG=[drawBgDesert,drawBgCanyon,drawBgMines,drawBgGhost,drawBgMountain
 
 /* ===== BOSS BODY DRAWS ===== */
 function rRect(x,y,w,h,r){X.beginPath();X.moveTo(x+r,y);X.lineTo(x+w-r,y);X.quadraticCurveTo(x+w,y,x+w,y+r);X.lineTo(x+w,y+h-r);X.quadraticCurveTo(x+w,y+h,x+w-r,y+h);X.lineTo(x+r,y+h);X.quadraticCurveTo(x,y+h,x,y+h-r);X.lineTo(x,y+r);X.quadraticCurveTo(x,y,x+r,y);X.closePath()}
+
+/* Per-boss aura/effect drawn behind body — gives each boss a unique signature */
+function drawAura(cx,cy,r,type,p){
+  if(type==='electric'){
+    X.strokeStyle='#00f0ff';X.lineWidth=2.5;X.lineCap='round';
+    for(let i=0;i<5;i++){
+      const a=boss.bob*3+i*Math.PI*2/5;
+      X.beginPath();
+      const sx=cx+Math.cos(a)*r,sy=cy+Math.sin(a)*r;
+      X.moveTo(sx,sy);
+      for(let j=1;j<6;j++){const a2=a+(j/6)*.4,rr=r+rand(-8,8);X.lineTo(cx+Math.cos(a2)*rr,cy+Math.sin(a2)*rr)}
+      X.stroke();
+    }
+    X.strokeStyle='#a0f0ff66';X.lineWidth=6;
+    for(let i=0;i<5;i++){const a=boss.bob*3+i*Math.PI*2/5;X.beginPath();X.moveTo(cx+Math.cos(a)*(r-10),cy+Math.sin(a)*(r-10));X.lineTo(cx+Math.cos(a)*(r+15),cy+Math.sin(a)*(r+15));X.stroke()}
+    X.lineCap='butt';
+  } else if(type==='fire'){
+    for(let i=0;i<10;i++){
+      const a=i*Math.PI/5+boss.bob*.6;
+      const rr=r+Math.sin(timeT*.2+i*1.3)*10;
+      const fx=cx+Math.cos(a)*rr,fy=cy+Math.sin(a)*rr;
+      X.fillStyle='#ff8a3055';X.beginPath();X.arc(fx,fy,16,0,Math.PI*2);X.fill();
+      X.fillStyle='#ffce6b';X.beginPath();
+      X.moveTo(fx,fy-10);X.quadraticCurveTo(fx-7,fy,fx,fy+8);X.quadraticCurveTo(fx+7,fy,fx,fy-10);X.fill();
+    }
+  } else if(type==='leaf'){
+    for(let i=0;i<8;i++){
+      const a=i*Math.PI/4+boss.bob*.4;
+      const rr=r+Math.sin(timeT*.15+i)*6;
+      const lx=cx+Math.cos(a)*rr,ly=cy+Math.sin(a)*rr;
+      X.save();X.translate(lx,ly);X.rotate(a+timeT*.05);
+      X.fillStyle='#7ed957';X.beginPath();X.ellipse(0,0,10,4,0,0,Math.PI*2);X.fill();
+      X.fillStyle='#3a8c3a';X.fillRect(-1,-1,12,1.5);
+      X.restore();
+    }
+  } else if(type==='void'){
+    X.strokeStyle='#a050d088';X.lineWidth=2;
+    for(let k=0;k<3;k++){
+      X.beginPath();
+      for(let a=0;a<Math.PI*2;a+=.1){
+        const rr=r+k*8+Math.sin(timeT*.1+k+a*3)*4;
+        const px=cx+Math.cos(a+boss.bob*.3+k)*rr,py=cy+Math.sin(a+boss.bob*.3+k)*rr*.85;
+        if(a===0)X.moveTo(px,py);else X.lineTo(px,py);
+      }
+      X.closePath();X.stroke();
+    }
+    for(let i=0;i<12;i++){const a=i/12*Math.PI*2+boss.bob*.5,rr=r+12;X.fillStyle='#ff6fb3';X.fillRect(cx+Math.cos(a)*rr-1,cy+Math.sin(a)*rr-1,2,2)}
+  } else if(type==='smoke'){
+    for(let i=0;i<6;i++){
+      const a=i*Math.PI/3+boss.bob*.25;
+      const rr=r+Math.sin(timeT*.1+i*1.7)*8;
+      X.fillStyle='rgba(120,120,140,.35)';
+      X.beginPath();X.ellipse(cx+Math.cos(a)*rr,cy+Math.sin(a)*rr*.6,22,14,a,0,Math.PI*2);X.fill();
+      X.fillStyle='rgba(180,180,200,.15)';
+      X.beginPath();X.ellipse(cx+Math.cos(a)*rr,cy+Math.sin(a)*rr*.6,32,18,a,0,Math.PI*2);X.fill();
+    }
+  } else if(type==='spark'){
+    for(let i=0;i<16;i++){
+      const a=i/16*Math.PI*2+boss.bob*.3;
+      const rr=r+(i%4)*5+Math.sin(timeT*.2+i)*4;
+      const sx=cx+Math.cos(a)*rr,sy=cy+Math.sin(a)*rr;
+      X.fillStyle='#ffce6b';X.fillRect(sx-1.5,sy-1.5,3,3);
+      X.fillStyle='#fff7c844';X.beginPath();X.arc(sx,sy,6,0,Math.PI*2);X.fill();
+      X.strokeStyle='#fff';X.lineWidth=1;
+      X.beginPath();X.moveTo(sx-3,sy);X.lineTo(sx+3,sy);X.moveTo(sx,sy-3);X.lineTo(sx,sy+3);X.stroke();
+    }
+  } else if(type==='halo'){
+    // Holy radiant rays
+    X.save();X.translate(cx,cy);X.rotate(boss.bob*.2);
+    for(let i=0;i<14;i++){
+      X.rotate(Math.PI*2/14);
+      X.fillStyle='#fff7c833';X.beginPath();
+      X.moveTo(0,-r-5);X.lineTo(-6,-r-30);X.lineTo(6,-r-30);X.closePath();X.fill();
+    }
+    X.restore();
+    X.fillStyle='#fff7c844';X.beginPath();X.arc(cx,cy-r*.5,r*.4,0,Math.PI*2);X.fill();
+  }
+}
 
 /* Accessory anchor — where to put the hat/horns/etc per body type */
 function accAnchor(bt,x,y){
@@ -1411,6 +1502,10 @@ function drawBoss(){
   // Drop shadow under boss — gives 3D grounded look
   X.fillStyle='rgba(0,0,0,0.35)';
   X.beginPath();X.ellipse(x+boss.w/2,GROUND-2,boss.w*.42,9,0,0,Math.PI*2);X.fill();
+  // Aura behind body — unique per boss
+  if(boss.config&&boss.config.aura){
+    drawAura(x+boss.w/2,y+boss.h*.5,boss.w*.6,boss.config.aura,p);
+  }
   if(boss.isFinal)drawMothership();
   else if(t==='cactus')drawCactus(x,y,p,hit);
   else if(t==='scorpion')drawScorpion(x,y,p,hit);
