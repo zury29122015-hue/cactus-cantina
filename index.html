@@ -254,7 +254,7 @@ function shake(t,m){shakeT=Math.max(shakeT,t);shakeMag=Math.max(shakeMag,m)}
 function loadBoss(id){
   const c=CFGS.find(c=>c.id===id);
   boss.config=c;boss.name=c.name;boss.bodyType=c.bodyType;boss.biome=c.biome;boss.palette=c.palette;
-  boss.isFinal=c.isFinal;boss.hp=c.hp;boss.maxHp=c.hp;
+  boss.isFinal=c.isFinal;boss.hp=Math.floor(c.hp*2);boss.maxHp=boss.hp;
   boss.w=140*c.size;boss.h=200*c.size;
   boss.x=W-boss.w-60;boss.y=240;boss.baseY=240;
   boss.state='intro';boss.stateTime=80;boss.sub=0;
@@ -890,11 +890,51 @@ function drawWraith(x,y,p,hit){
   X.fillStyle=p.a+'66';X.beginPath();X.arc(x+60,y+80,16,0,Math.PI*2);X.fill();X.beginPath();X.arc(x+100,y+80,16,0,Math.PI*2);X.fill();
 }
 function drawGolem(x,y,p,hit){
-  const main=hit?'#fff':p.p,dark=hit?'#fff':p.s;
-  X.fillStyle=dark;rRect(x+20,y+30,120,180,12);X.fill();
-  X.fillStyle=main;rRect(x+30,y+40,40,40,8);X.fill();rRect(x+90,y+40,40,40,8);X.fill();rRect(x+30,y+100,40,40,8);X.fill();rRect(x+90,y+100,40,40,8);X.fill();rRect(x+30,y+160,40,40,8);X.fill();rRect(x+90,y+160,40,40,8);X.fill();
-  X.fillStyle=p.a;X.beginPath();X.arc(x+80,y+120,18,0,Math.PI*2);X.fill();X.fillStyle='#fff';X.beginPath();X.arc(x+80,y+120,10,0,Math.PI*2);X.fill();X.fillStyle=p.a;X.beginPath();X.arc(x+80,y+120,5,0,Math.PI*2);X.fill();
-  X.fillStyle=dark;X.fillRect(x,y+90,20,60);X.fillRect(x+140,y+90,20,60);
+  const main=hit?'#fff':p.p,dark=hit?'#fff':p.s,glow=hit?'#fff':p.a;
+  // Torso — chunky armored body with radial gradient for volume
+  let tg;
+  if(hit){tg='#fff'}
+  else{tg=X.createRadialGradient(x+58,y+90,8,x+80,y+150,130);tg.addColorStop(0,'rgba(255,255,255,.35)');tg.addColorStop(.25,main);tg.addColorStop(1,dark)}
+  X.fillStyle=tg;
+  X.beginPath();
+  X.moveTo(x+22,y+82);X.quadraticCurveTo(x+10,y+92,x+18,y+115);
+  X.lineTo(x+28,y+202);X.quadraticCurveTo(x+30,y+218,x+50,y+218);
+  X.lineTo(x+110,y+218);X.quadraticCurveTo(x+130,y+218,x+132,y+202);
+  X.lineTo(x+142,y+115);X.quadraticCurveTo(x+150,y+92,x+138,y+82);
+  X.lineTo(x+120,y+82);X.quadraticCurveTo(x+80,y+62,x+40,y+82);
+  X.closePath();X.fill();
+  // Head dome
+  X.fillStyle=tg;X.beginPath();X.ellipse(x+80,y+52,34,32,0,0,Math.PI*2);X.fill();
+  // Neck shadow
+  X.fillStyle='rgba(0,0,0,.3)';X.fillRect(x+62,y+74,36,10);
+  // Shoulder pads
+  X.fillStyle=dark;X.beginPath();X.ellipse(x+22,y+92,20,15,0,0,Math.PI*2);X.fill();X.beginPath();X.ellipse(x+138,y+92,20,15,0,0,Math.PI*2);X.fill();
+  X.fillStyle='rgba(255,255,255,.25)';X.beginPath();X.ellipse(x+20,y+88,11,7,0,0,Math.PI*2);X.fill();X.beginPath();X.ellipse(x+136,y+88,11,7,0,0,Math.PI*2);X.fill();
+  // Arms hanging
+  X.fillStyle=tg;
+  X.beginPath();X.moveTo(x+6,y+98);X.quadraticCurveTo(x-6,y+138,x+2,y+172);X.quadraticCurveTo(x+12,y+182,x+22,y+172);X.quadraticCurveTo(x+28,y+138,x+22,y+102);X.closePath();X.fill();
+  X.beginPath();X.moveTo(x+154,y+98);X.quadraticCurveTo(x+166,y+138,x+158,y+172);X.quadraticCurveTo(x+148,y+182,x+138,y+172);X.quadraticCurveTo(x+132,y+138,x+138,y+102);X.closePath();X.fill();
+  // Fists
+  X.fillStyle=dark;X.beginPath();X.arc(x+12,y+180,13,0,Math.PI*2);X.fill();X.beginPath();X.arc(x+148,y+180,13,0,Math.PI*2);X.fill();
+  // Chest plate notch
+  X.fillStyle='rgba(0,0,0,.18)';X.beginPath();X.moveTo(x+52,y+104);X.lineTo(x+108,y+104);X.lineTo(x+114,y+172);X.lineTo(x+46,y+172);X.closePath();X.fill();
+  // Glowing core
+  const cg=X.createRadialGradient(x+80,y+132,2,x+80,y+132,32);
+  cg.addColorStop(0,'#fff');cg.addColorStop(.35,glow);cg.addColorStop(1,'rgba(0,0,0,0)');
+  X.fillStyle=cg;X.beginPath();X.arc(x+80,y+132,32,0,Math.PI*2);X.fill();
+  X.fillStyle=glow;X.beginPath();X.arc(x+80,y+132,11,0,Math.PI*2);X.fill();
+  X.fillStyle='#fff';X.beginPath();X.arc(x+78,y+130,4,0,Math.PI*2);X.fill();
+  // Visor — dark band with glowing slit eyes
+  X.fillStyle='#0a0510';
+  X.beginPath();X.moveTo(x+55,y+48);X.quadraticCurveTo(x+80,y+42,x+105,y+48);X.lineTo(x+108,y+62);X.quadraticCurveTo(x+80,y+70,x+52,y+62);X.closePath();X.fill();
+  // Eye slits glowing
+  const wob=Math.sin(boss.bob*.6)*1.5;
+  X.fillStyle=glow;X.beginPath();X.ellipse(x+68+wob,y+55,8,3.5,0,0,Math.PI*2);X.fill();X.beginPath();X.ellipse(x+92+wob,y+55,8,3.5,0,0,Math.PI*2);X.fill();
+  X.fillStyle='#fff';X.beginPath();X.ellipse(x+68+wob,y+55,3.5,1.5,0,0,Math.PI*2);X.fill();X.beginPath();X.ellipse(x+92+wob,y+55,3.5,1.5,0,0,Math.PI*2);X.fill();
+  // Top head highlight
+  X.fillStyle='rgba(255,255,255,.22)';X.beginPath();X.ellipse(x+72,y+38,18,8,-.3,0,Math.PI*2);X.fill();
+  // Bottom shadow
+  X.fillStyle='rgba(0,0,0,.18)';X.beginPath();X.ellipse(x+108,y+190,30,18,.3,0,Math.PI*2);X.fill();
 }
 function drawLantern(x,y,p,hit){
   const main=hit?'#fff':p.p,dark=hit?'#fff':p.s;
@@ -991,6 +1031,9 @@ function drawBoss(){
   X.save();
   if(boss.invuln>0&&Math.floor(timeT/3)%2===0)X.globalAlpha=.6;
   const t=boss.bodyType,x=boss.x,y=boss.y,p=boss.palette,hit=boss.hitFlash>0;
+  // Drop shadow under boss — gives 3D grounded look
+  X.fillStyle='rgba(0,0,0,0.35)';
+  X.beginPath();X.ellipse(x+boss.w/2,GROUND-2,boss.w*.42,9,0,0,Math.PI*2);X.fill();
   if(boss.isFinal)drawMothership();
   else if(t==='cactus')drawCactus(x,y,p,hit);
   else if(t==='scorpion')drawScorpion(x,y,p,hit);
