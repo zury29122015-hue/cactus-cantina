@@ -1159,14 +1159,17 @@ function onBossDefeated(){
 /* ===== LOOP ===== */
 function loop(){
   timeT++;titlePulse++;
+  pollGamepad();
   if(state==='title'){
     drawTitle();
+    drawGamepadToast();
     if(consume('enter')){state='map'}
     if(consume('r')){resetProgress()}
     requestAnimationFrame(loop);return;
   }
   if(state==='map'){
     drawMap();
+    drawGamepadToast();
     if(consume('enter')){
       const id=Math.min(progress.current,FINAL_ID);
       startFight(id);
@@ -1181,6 +1184,7 @@ function loop(){
     if(state==='win')drawWin();
     else if(state==='lose')drawLose();
     else drawFinalWin();
+    drawGamepadToast();
     if(consume('enter')){state=(state==='final_win')?'title':'map'}
     requestAnimationFrame(loop);return;
   }
@@ -1188,8 +1192,50 @@ function loop(){
   if(slowmo>0)slowmo--;
   updatePlayer();updateBoss();updateBullets();updateParticles();
   renderScene();
+  drawGamepadToast();
   if(consume('escape'))state='map';
   requestAnimationFrame(loop);
+}
+
+/* ===== GAMEPAD (PS5 DualSense / standard) =====
+   Cruz=saltar  Cuadrado=disparar  Círculo=parry  Triángulo=super
+   L2=dash  R1=parry  R2=disparar  Options=enter  Stick L / D-pad=mover  */
+const GP_MAP={0:' ',1:'k',2:'j',3:'l',4:'l',5:'k',6:'shift',7:'j',9:'enter',12:' ',14:'a',15:'d'};
+let gpHeld={};
+let gpToast=0,gpId='';
+addEventListener('gamepadconnected',e=>{gpId=e.gamepad.id||'Gamepad';gpToast=180});
+addEventListener('gamepaddisconnected',()=>{gpId='';gpToast=120;gpHeld={};});
+function pollGamepad(){
+  const pads=(navigator.getGamepads&&navigator.getGamepads())||[];
+  let pad=null;for(const p of pads)if(p&&p.connected){pad=p;break}
+  if(!pad){if(Object.keys(gpHeld).length){for(const k in gpHeld)if(gpHeld[k]){K[k]=false;gpHeld[k]=false}}return}
+  const now={};
+  for(const idxStr in GP_MAP){
+    const idx=+idxStr,key=GP_MAP[idxStr],b=pad.buttons[idx];
+    if(b&&(b.pressed||b.value>.5))now[key]=true;
+  }
+  // Left stick X (deadzone .3)
+  if(pad.axes[0]<-.3)now.a=true;
+  if(pad.axes[0]>.3)now.d=true;
+  // Apply: press newly held
+  for(const k in now){
+    if(!gpHeld[k]){if(!K[k])pressed[k]=true;gpHeld[k]=true}
+    K[k]=true;
+  }
+  // Release what gamepad previously held but no longer
+  for(const k in gpHeld){if(gpHeld[k]&&!now[k]){K[k]=false;gpHeld[k]=false}}
+  if(Object.keys(now).length)initAudio();
+}
+function drawGamepadToast(){
+  if(gpToast<=0)return;
+  gpToast--;
+  const a=Math.min(1,gpToast/30);
+  X.save();X.globalAlpha=a*.92;
+  X.fillStyle='#1a0a14';X.fillRect(W/2-180,H-50,360,32);
+  X.strokeStyle='#ffce6b';X.lineWidth=2;X.strokeRect(W/2-180,H-50,360,32);
+  X.fillStyle='#ffce6b';X.font='bold 13px ui-sans-serif,system-ui';X.textAlign='center';
+  X.fillText(gpId?('🎮 '+gpId.substring(0,40)+' conectado'):'🎮 Gamepad desconectado',W/2,H-30);
+  X.textAlign='left';X.restore();
 }
 
 /* ===== TOUCH CONTROLS ===== */
