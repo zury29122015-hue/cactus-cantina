@@ -240,6 +240,9 @@ function buildConfigs(){
 }
 const CFGS=buildConfigs();
 const FINAL_ID=CFGS[CFGS.length-1].id;
+// All bosses unlocked from the start — player can pick any with cursor on map
+progress.current=FINAL_ID;saveProgress();
+let mapCursor=1;
 
 /* ===== ENTITIES ===== */
 const player={x:180,y:380,w:26,h:44,vx:0,vy:0,onGround:false,facing:1,hp:4,maxHp:4,iframes:60,dashCd:0,dashTime:0,dashDir:1,shootCd:0,parryPoints:0,maxParry:3,parryAnim:0,superReadyPulse:0,runFrame:0,alive:true};
@@ -1194,53 +1197,55 @@ function drawMap(){
     X.fillStyle='#ffce6b88';X.font='bold 11px ui-monospace,monospace';X.fillText(BIOMES[i].name,12,y-22);
     X.fillStyle='#caa57e66';X.font='10px ui-sans-serif,system-ui';X.fillText(BIOMES[i].sub,12,y-10);
   }
-  // connections
+  // connections — all paths open (no locks anywhere)
   for(let id=1;id<=FINAL_ID-1;id++){
     const a=mapNodePos(id),b=mapNodePos(id+1);if(!a||!b)continue;
-    const aDef=progress.defeated.includes(id);
-    const bUnlocked=progress.current>=id+1||progress.defeated.includes(id+1);
-    const open=aDef&&bUnlocked;
-    if(open){X.strokeStyle='#ffce6b';X.setLineDash([])}
-    else{X.strokeStyle='#3a2618';X.setLineDash([6,4])}
-    X.lineWidth=3;X.beginPath();X.moveTo(a.x,a.y);
-    // arc slightly
+    X.strokeStyle='#ffce6b88';X.lineWidth=3;
+    X.beginPath();X.moveTo(a.x,a.y);
     const midX=(a.x+b.x)/2,midY=(a.y+b.y)/2-15;
-    X.quadraticCurveTo(midX,midY,b.x,b.y);X.stroke();X.setLineDash([]);
-    // ladder rungs visual on vertical transitions
+    X.quadraticCurveTo(midX,midY,b.x,b.y);X.stroke();
+    // ladder rungs on vertical transitions
     if(Math.abs(a.y-b.y)>40){
-      const steps=5;X.strokeStyle=open?'#ffce6b':'#3a2618';X.lineWidth=2;
-      for(let s=1;s<steps;s++){const t=s/steps,x=a.x+(b.x-a.x)*t,y=a.y+(b.y-a.y)*t;X.beginPath();X.moveTo(x-6,y);X.lineTo(x+6,y);X.stroke()}
+      X.strokeStyle='#ffce6b88';X.lineWidth=2;
+      for(let s=1;s<5;s++){const t=s/5,x=a.x+(b.x-a.x)*t,y=a.y+(b.y-a.y)*t;X.beginPath();X.moveTo(x-6,y);X.lineTo(x+6,y);X.stroke()}
     }
-    // chain icon for locked
-    if(!open){X.fillStyle='#caa57e';X.beginPath();X.arc(midX,midY,7,0,Math.PI*2);X.fill();X.fillStyle='#1a0a08';X.fillRect(midX-3,midY-2,6,4)}
   }
-  // nodes
+  // nodes — all unlocked, cursor selects which to fight
   for(let id=1;id<=FINAL_ID;id++){
     const pos=mapNodePos(id);if(!pos)continue;
     const cfg=CFGS.find(c=>c.id===id);
     const def=progress.defeated.includes(id);
-    const isCurrent=progress.current===id&&!def;
-    const locked=progress.current<id;
+    const isSelected=mapCursor===id;
     const r=pos.final?28:18;
-    if(locked){
-      X.fillStyle='#1a0a14';X.beginPath();X.arc(pos.x,pos.y,r,0,Math.PI*2);X.fill();
-      X.strokeStyle='#3a2618';X.lineWidth=2;X.beginPath();X.arc(pos.x,pos.y,r,0,Math.PI*2);X.stroke();
-      X.fillStyle='#caa57e';X.font='bold 14px ui-sans-serif,system-ui';X.textAlign='center';X.fillText('?',pos.x,pos.y+5);X.textAlign='left';
+    if(isSelected){
+      const pulse=1+Math.sin(timeT*.15)*.18;
+      // outer cursor ring
+      X.strokeStyle='#fff';X.lineWidth=4;X.setLineDash([6,4]);
+      X.beginPath();X.arc(pos.x,pos.y,r*pulse+8,0,Math.PI*2);X.stroke();
+      X.setLineDash([]);
+      X.fillStyle=pos.final?'#a050d0':cfg.palette.p;
+      X.beginPath();X.arc(pos.x,pos.y,r*pulse,0,Math.PI*2);X.fill();
+      X.strokeStyle=pos.final?'#ff6fb3':'#ffce6b';X.lineWidth=3;X.beginPath();X.arc(pos.x,pos.y,r*pulse,0,Math.PI*2);X.stroke();
+      X.fillStyle='#fff';X.font='bold 14px ui-sans-serif,system-ui';X.textAlign='center';
+      X.fillText(pos.final?'★':String(id),pos.x,pos.y+5);
+      // name label below
+      X.fillStyle='#ffce6b';X.font='bold 13px ui-sans-serif,system-ui';
+      X.fillText(cfg.name,pos.x,pos.y+r+22);
+      X.fillStyle=def?'#7ed957':'#caa57e';X.font='11px ui-sans-serif,system-ui';
+      X.fillText(def?'✓ derrotado — ENTER para rejugar':'— ENTER para pelear —',pos.x,pos.y+r+38);
+      X.textAlign='left';
     } else if(def){
       X.fillStyle='#2a3a20';X.beginPath();X.arc(pos.x,pos.y,r,0,Math.PI*2);X.fill();
       X.strokeStyle='#7ed957';X.lineWidth=2;X.beginPath();X.arc(pos.x,pos.y,r,0,Math.PI*2);X.stroke();
       X.strokeStyle='#7ed957';X.lineWidth=3;X.beginPath();X.moveTo(pos.x-7,pos.y);X.lineTo(pos.x-2,pos.y+5);X.lineTo(pos.x+7,pos.y-6);X.stroke();
-    } else if(isCurrent){
-      const pulse=1+Math.sin(timeT*.15)*.15;
-      X.fillStyle=pos.final?'#a050d0':cfg.palette.p;
-      X.beginPath();X.arc(pos.x,pos.y,r*pulse,0,Math.PI*2);X.fill();
-      X.strokeStyle=pos.final?'#ff6fb3':'#ffce6b';X.lineWidth=3;X.beginPath();X.arc(pos.x,pos.y,r*pulse,0,Math.PI*2);X.stroke();
-      X.fillStyle='#fff';X.font='bold 14px ui-sans-serif,system-ui';X.textAlign='center';X.fillText(pos.final?'★':String(id),pos.x,pos.y+5);X.textAlign='left';
-      // name label
-      X.fillStyle='#ffce6b';X.font='bold 13px ui-sans-serif,system-ui';X.textAlign='center';
-      X.fillText(cfg.name,pos.x,pos.y+r+18);X.fillStyle='#caa57e';X.font='11px ui-sans-serif,system-ui';X.fillText('— ENTER para pelear —',pos.x,pos.y+r+34);X.textAlign='left';
+    } else {
+      // available (not selected, not defeated)
+      X.fillStyle=cfg.palette.s;X.beginPath();X.arc(pos.x,pos.y,r,0,Math.PI*2);X.fill();
+      X.strokeStyle=cfg.palette.p;X.lineWidth=2;X.beginPath();X.arc(pos.x,pos.y,r,0,Math.PI*2);X.stroke();
+      X.fillStyle=cfg.palette.a;X.font='bold 12px ui-sans-serif,system-ui';X.textAlign='center';
+      X.fillText(pos.final?'★':String(id),pos.x,pos.y+4);X.textAlign='left';
     }
-    if(pos.final&&!def){X.fillStyle='#ff6fb3';X.font='bold 11px ui-sans-serif,system-ui';X.textAlign='center';X.fillText('JEFE FINAL',pos.x,pos.y-r-8);X.textAlign='left'}
+    if(pos.final&&!isSelected){X.fillStyle='#ff6fb3';X.font='bold 11px ui-sans-serif,system-ui';X.textAlign='center';X.fillText('JEFE FINAL',pos.x,pos.y-r-8);X.textAlign='left'}
   }
 }
 
@@ -1317,10 +1322,12 @@ function loop(){
   if(state==='map'){
     drawMap();
     drawGamepadToast();
-    if(consume('enter')){
-      const id=Math.min(progress.current,FINAL_ID);
-      startFight(id);
-    }
+    // Cursor navigation
+    if(consume('arrowleft')||consume('a'))  mapCursor=mapCursor>1?mapCursor-1:FINAL_ID;
+    if(consume('arrowright')||consume('d')) mapCursor=mapCursor<FINAL_ID?mapCursor+1:1;
+    if(consume('arrowup')||consume('w'))    mapCursor=Math.min(FINAL_ID,mapCursor+8);
+    if(consume('arrowdown')||consume('s'))  mapCursor=Math.max(1,mapCursor-8);
+    if(consume('enter'))startFight(mapCursor);
     if(consume('escape'))state='title';
     if(consume('r'))resetProgress();
     requestAnimationFrame(loop);return;
