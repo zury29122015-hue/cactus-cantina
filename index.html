@@ -164,65 +164,66 @@ const ATKS_BY_BODY={
 };
 const ATK_DUR={spines:110,tumbleweed:110,stomp:100,strum:130,notes:110,slam:110,petals:130,heartdash:100,seeds:110,barrage:100,laser:120,bombs:110,divebomb:110};
 
-/* 50 hand-crafted bosses. Format: [name, body, palIdx, accessory, hp, size, attackMix, aggression] */
+/* 50 hand-crafted bosses, mapped to archetypes from the user's reference image.
+   Format: [name, body, palIdx, accessory, hp, size, attackMix, aggression] */
 const BOSS_DATA=[
-  // CIUDAD NEÓN (1-8)
-  ['Volt Centinela',     'golem',   0,'antenna',  180,1.20,['barrage','laser','stomp'],                 1.00],
-  ['Cazador 0X',         'wraith',  1,'goggles',  195,1.00,['barrage','divebomb'],                      1.05],
-  ['Núcleo MK-7',        'golem',   2,'antenna',  210,1.30,['barrage','stomp','petals'],                1.08],
-  ['Drone Carmesí',      'ufo',     1,'antenna',  225,0.95,['laser','divebomb'],                        1.10],
-  ['Sirena de Datos',    'wraith',  0,'antenna',  240,1.05,['strum','petals','laser'],                  1.12],
-  ['Centinela Pesado',   'golem',   1,'crown',    265,1.40,['stomp','slam','barrage'],                  1.15],
-  ['Mente-Red',          'lantern', 0,'antenna',  285,1.10,['notes','petals','laser'],                  1.15],
-  ['Rey de la Estática', 'golem',   2,'crown',    320,1.45,['slam','barrage','laser','petals'],         1.18],
-  // INFIERNO ARDIENTE (9-16)
-  ['Ascua Quemante',     'cactus',  0,'flame',    335,1.10,['spines','petals','bombs'],                 1.18],
-  ['Vampiresa Magma',    'wraith',  1,'horns',    350,1.00,['strum','seeds','bombs'],                   1.20],
-  ['Drago Llamarada',    'vulture', 0,'horns',    370,1.25,['divebomb','barrage','notes'],              1.22],
-  ['Cuerno Infierno',    'scorpion',2,'horns',    385,1.10,['spines','bombs','slam'],                   1.22],
-  ['Espiral de Brasas',  'meteor',  0,'flame',    400,1.15,['bombs','petals','divebomb'],               1.25],
-  ['Cazador de Almas',   'wraith',  2,'mask',     420,1.05,['strum','seeds','petals'],                  1.25],
-  ['Corazón Volcánico',  'meteor',  1,'flame',    440,1.30,['bombs','petals','slam'],                   1.28],
-  ['Belial de Cenizas',  'cactus',  2,'horns',    470,1.40,['petals','bombs','spines','slam'],          1.30],
-  // BOSQUE ANCESTRAL (17-24)
-  ['Raíz Marchita',      'cactus',  0,'sombrero', 485,1.30,['spines','tumbleweed','stomp'],             1.30],
-  ['Lupa Verde',         'condor',  1,'eyepatch', 500,1.00,['divebomb','notes','barrage'],              1.32],
-  ['Druida Mil-Hojas',   'wraith',  2,'crown',    515,1.05,['petals','strum','seeds'],                  1.32],
-  ['Cabra Cornuda',      'troll',   0,'horns',    530,1.20,['stomp','divebomb','slam'],                 1.35],
-  ['Hada Tormentosa',    'wraith',  1,'antenna',  545,0.90,['petals','strum','notes'],                  1.35],
-  ['Lobo de Estación',   'troll',   2,'beard',    560,1.25,['stomp','divebomb','bombs'],                1.38],
-  ['Hongo Susurrante',   'lantern', 0,'flame',    575,1.10,['notes','seeds','petals'],                  1.38],
-  ['Reina del Musgo',    'wraith',  1,'crown',    600,1.20,['petals','seeds','strum','notes'],          1.40],
-  // CRIPTA OSCURA (25-32)
-  ['Conde Vélaris',      'wraith',  0,'tophat',   615,1.05,['strum','seeds','divebomb'],                1.40],
-  ['Bruja Aracne',       'scorpion',1,'tophat',   630,1.10,['spines','bombs','petals'],                 1.42],
-  ['Lich Hueso-Oro',     'wraith',  2,'crown',    645,1.10,['strum','petals','notes','seeds'],          1.42],
-  ['Cuervo del Velo',    'wraith',  0,'mask',     660,1.05,['strum','notes','petals'],                  1.45],
-  ['Sepulturero',        'troll',   1,'beard',    675,1.25,['slam','stomp','bombs'],                    1.45],
-  ['Niño Pálido',        'wraith',  2,'bandana',  690,0.85,['notes','strum','seeds'],                   1.48],
-  ['Madama Plaga',       'wraith',  0,'goggles',  705,1.00,['notes','petals','bombs','seeds'],          1.48],
-  ['Rey Calavera',       'piano',   1,'crown',    730,1.15,['notes','strum','barrage','petals'],        1.50],
-  // TEMPLO CELESTIAL (33-40)
-  ['Centurión Dorado',   'golem',   0,'crown',    745,1.30,['stomp','slam','barrage'],                  1.50],
-  ['Ángel Hoja-Acero',   'condor',  1,'crown',    760,1.20,['divebomb','barrage','notes'],              1.52],
-  ['Paladín de Auroras', 'golem',   2,'sword',    775,1.30,['slam','barrage','petals'],                 1.52],
-  ['Sacerdotisa Luz',    'wraith',  0,'crown',    790,1.05,['strum','petals','notes'],                  1.55],
-  ['Monje del Vacío',    'troll',   1,'bandana',  805,1.10,['stomp','divebomb','slam'],                 1.55],
-  ['Querubín de Hierro', 'golem',   2,'antenna',  820,1.25,['stomp','slam','laser'],                    1.58],
-  ['Gran Maestre',       'troll',   0,'beard',    840,1.30,['slam','bombs','barrage'],                  1.58],
-  ['Sol Naciente',       'meteor',  1,'flame',    860,1.30,['bombs','petals','laser'],                  1.60],
-  // VACÍO ESTELAR (41-49)
-  ['Cazador Xenom',      'scorpion',0,'antenna',  870,1.10,['bombs','spines','petals'],                 1.60],
-  ['Reina Nebulosa',     'wraith',  1,'crown',    885,1.15,['strum','petals','seeds','laser'],          1.62],
-  ['Sonda Eco',          'ufo',     2,'antenna',  895,0.95,['laser','barrage','divebomb'],              1.62],
-  ['Comando Lunar',      'golem',   0,'goggles',  905,1.15,['barrage','bombs','divebomb'],              1.64],
-  ['Mercader Estelar',   'wraith',  1,'goggles',  915,1.05,['strum','petals','notes'],                  1.64],
-  ['Espectro de Pulsar', 'wraith',  2,'antenna',  925,1.05,['strum','petals','heartdash'],              1.66],
-  ['Caballero Cuántico', 'golem',   0,'sword',    935,1.20,['slam','barrage','laser'],                  1.66],
-  ['Vacío Susurrante',   'wraith',  1,'mask',     945,1.10,['strum','petals','seeds'],                  1.68],
-  ['Centinela Anular',   'ufo',     2,'crown',    960,1.25,['laser','barrage','divebomb','petals'],     1.68],
-  // Jefe final (50)
-  ['LA NAVE MADRE','mothership',0,'antenna',1100,1.65,['barrage','laser','bombs','petals','heartdash','seeds','notes'],1.70],
+  // === CIUDAD NEÓN (1-8): cyborgs, mechs, drones ===
+  ['Volt Centinela',      'golem',   0,'antenna',  180,1.20,['barrage','laser','stomp'],             1.00], // #1 héroe azul eléctrico
+  ['Comando Cero-X',      'wraith',  1,'goggles',  195,1.00,['barrage','divebomb'],                  1.05], // #12 soldado táctico
+  ['Mecha Solar',         'golem',   1,'antenna',  215,1.30,['barrage','stomp','petals'],            1.08], // #9 mecha naranja
+  ['Cyber-Hechicera',     'wraith',  1,'antenna',  235,1.05,['strum','petals','laser'],              1.10], // #14 maga sintética
+  ['Sintética Verde',     'wraith',  0,'antenna',  255,1.00,['barrage','notes','divebomb'],          1.12], // #34 cyber girl
+  ['Mecha Pesado',        'golem',   2,'crown',    275,1.40,['stomp','slam','barrage'],              1.15], // #32 mecha brutal
+  ['Mecha Centinela',     'golem',   0,'antenna',  295,1.25,['stomp','barrage','laser'],             1.15], // #33 mecha vigía
+  ['Rey de la Estática',  'golem',   2,'crown',    325,1.45,['slam','barrage','laser','petals'],     1.18], // #18 mecha jefe
+  // === INFIERNO ARDIENTE (9-16): demonios, fuego, dragones ===
+  ['Sirena de Fuego',     'wraith',  0,'flame',    340,1.05,['strum','seeds','bombs'],               1.18], // #2 maga de llamas
+  ['Drago Carmesí',       'vulture', 1,'horns',    360,1.25,['divebomb','barrage','notes'],          1.20], // #8 dragón rojo
+  ['Demonio Espino',      'cactus',  2,'horns',    380,1.20,['spines','petals','bombs'],             1.22], // #35 demonio puntiagudo
+  ['Lord Magma',          'troll',   0,'horns',    400,1.30,['stomp','bombs','slam'],                1.25], // brutal infernal
+  ['Berserker Carmesí',   'wraith',  0,'sword',    420,1.05,['barrage','divebomb','strum'],          1.25], // #29 guerrero rojo
+  ['Bárbaro de Fuego',    'troll',   1,'beard',    440,1.20,['stomp','bombs','slam'],                1.28], // #15 bárbaro
+  ['Corazón Volcánico',   'meteor',  1,'flame',    460,1.30,['bombs','petals','slam'],               1.28], // núcleo de lava
+  ['Belial de Cenizas',   'cactus',  2,'horns',    485,1.40,['petals','bombs','spines','slam'],      1.30], // demonio mayor
+  // === BOSQUE ANCESTRAL (17-24): naturaleza, bestias, druidas ===
+  ['Hijo del Cactus',     'cactus',  0,'sombrero', 495,1.30,['spines','tumbleweed','stomp'],         1.30], // #5 planta humanoide
+  ['Orco Bruto',          'troll',   1,'horns',    510,1.25,['stomp','slam','bombs'],                1.32], // #3 orco musculoso
+  ['Saetera de Elfo',     'wraith',  0,'crown',    525,1.00,['notes','strum','divebomb'],            1.32], // #10 elfo arquero
+  ['Guerrero León',       'troll',   2,'beard',    540,1.25,['stomp','divebomb','slam'],             1.35], // #21 bestia leonina
+  ['Zorra Nueve Colas',   'condor',  1,'bandana',  555,1.05,['divebomb','notes','barrage'],          1.35], // #24 kitsune
+  ['Lobo Lunar',          'troll',   0,'horns',    570,1.20,['stomp','divebomb','bombs'],            1.38], // #31 werewolf
+  ['Trasgo Esmeralda',    'troll',   1,'horns',    585,0.95,['bombs','spines','divebomb'],           1.38], // #38 goblin
+  ['Druida de Bellotas',  'wraith',  2,'crown',    610,1.15,['petals','seeds','strum','notes'],      1.40], // #44 druida del bosque
+  // === CRIPTA OSCURA (25-32): muertos vivientes, vampiros, brujas ===
+  ['Segador Oscuro',      'wraith',  0,'tophat',   625,1.10,['strum','seeds','divebomb'],            1.40], // #6 reaper encapuchado
+  ['Bruja del Caldero',   'wraith',  1,'tophat',   640,0.95,['petals','notes','strum'],              1.42], // #17 bruja clásica
+  ['Hechicera Carmín',    'wraith',  2,'tophat',   655,1.00,['strum','petals','seeds'],              1.42], // #13 sorceresa púrpura
+  ['Conde Vélaris',       'wraith',  1,'tophat',   670,1.05,['strum','seeds','divebomb'],            1.45], // #25 vampiro
+  ['Capo del Saloon',     'wraith',  0,'tophat',   685,1.00,['barrage','bombs','divebomb'],          1.45], // #26 mafioso
+  ['Aracnis Negra',       'scorpion',1,'tophat',   700,1.10,['spines','bombs','petals'],             1.48], // #27 bruja araña
+  ['Lich del Acero',      'wraith',  2,'horns',    720,1.10,['strum','petals','notes','seeds'],      1.48], // #49 lich
+  ['Rey Calavera',        'piano',   1,'crown',    750,1.20,['notes','strum','barrage','petals'],    1.50], // #50 rey de la muerte
+  // === TEMPLO CELESTIAL (33-40): paladines, ángeles, monjes ===
+  ['Paladín de Oro',      'golem',   0,'crown',    765,1.30,['stomp','slam','barrage'],              1.50], // #22 caballero dorado
+  ['Ángel Plata',         'condor',  2,'crown',    780,1.15,['divebomb','barrage','notes'],          1.52], // #36 ángel mujer
+  ['Paladín Alado',       'golem',   0,'sword',    795,1.30,['slam','barrage','petals'],             1.52], // #37 ángel caballero
+  ['Sacerdote Místico',   'wraith',  1,'crown',    810,1.05,['strum','petals','notes'],              1.55], // #16 clérigo
+  ['Sacerdotisa Luz',     'wraith',  0,'crown',    825,1.05,['strum','petals','notes','seeds'],      1.55], // #40 maga sagrada
+  ['Maga Rosa',           'wraith',  2,'crown',    840,1.05,['petals','notes','seeds'],              1.58], // #30 maga pink
+  ['Atleta Dorado',       'troll',   0,'beard',    855,1.30,['stomp','barrage','slam'],              1.58], // #28 héroe rubio
+  ['Monje Cuántico',      'troll',   1,'bandana',  880,1.10,['stomp','divebomb','slam'],             1.60], // #48 monje calvo
+  // === VACÍO ESTELAR (41-49): alienígenas, espacio, samurái cósmico ===
+  ['Gato Mecánico',       'ufo',     0,'antenna',  895,0.95,['laser','divebomb','barrage'],          1.60], // #7 mech-cat
+  ['Espectro Plateado',   'wraith',  2,'mask',     910,1.05,['strum','petals','divebomb'],           1.62], // #4 ninja espacial
+  ['Embajador Xenom',     'scorpion',0,'antenna',  925,1.10,['bombs','spines','petals'],             1.62], // #43 alien verde
+  ['Mecha Lunar',         'golem',   1,'antenna',  940,1.20,['barrage','bombs','divebomb'],          1.64], // #47 space marine
+  ['Samurái de Sombra',   'troll',   2,'crown',    955,1.20,['slam','divebomb','barrage'],           1.64], // #19 samurái cósmico
+  ['Centinela de Hielo',  'meteor',  0,'antenna',  970,1.15,['petals','bombs','laser'],              1.66], // #39 elemental hielo
+  ['Hechicera de Noche',  'wraith',  2,'crown',    985,1.15,['strum','petals','seeds','laser'],      1.66], // #41 maga oscura
+  ['Minotauro Lunar',     'troll',   1,'horns',   1000,1.30,['stomp','slam','bombs'],                1.68], // #42 minotauro
+  ['Pistolero Sombra',    'wraith',  0,'sombrero',1020,1.05,['barrage','divebomb','notes'],          1.68], // #46 cowboy fantasma
+  // === JEFE FINAL (50): nave alienígena ===
+  ['LA NAVE MADRE','mothership',0,'antenna',1200,1.65,['barrage','laser','bombs','petals','heartdash','seeds','notes'],1.70],
 ];
 
 function buildConfigs(){
