@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Cactus Cantina — Cazador de Bandoleros</title>
+<title>Cazador de Bandoleros</title>
 <style>
   html,body{margin:0;padding:0;background:#1a0a14;color:#f6e2c0;font-family:ui-sans-serif,system-ui,sans-serif;overscroll-behavior:none}
   #wrap{display:flex;flex-direction:column;align-items:center;padding:18px;gap:10px}
@@ -44,12 +44,6 @@
 <div id="wrap">
   <h1>CAZADOR DE BANDOLEROS</h1>
   <canvas id="game" width="960" height="540"></canvas>
-  <div class="hud">
-    <kbd>A</kbd> <kbd>D</kbd> mover · <kbd>W</kbd>/<kbd>Espacio</kbd> saltar · <kbd>Shift</kbd> dash · <kbd>J</kbd> / click disparar ·
-    <kbd>K</kbd> parry <span class="pink">(rosas)</span> · <kbd>L</kbd> SUPER <span class="pink">(3 parries → ½ vida)</span>
-    &nbsp;·&nbsp; En el mapa: <kbd>Enter</kbd> pelear · <kbd>Esc</kbd> menú · <kbd>R</kbd> reiniciar partida
-  </div>
-  <div class="credit">Juego original. 50 jefes inventados a través de 6 biomas + nave alienígena final.</div>
 </div>
 <button id="tc-toggle" title="Mostrar/ocultar controles táctiles">📱</button>
 <div id="touch-controls">
@@ -75,7 +69,13 @@ addEventListener('keyup',e=>{K[e.key.toLowerCase()]=false});
 function consume(k){if(pressed[k]){pressed[k]=false;return true}return false}
 function down(...ks){return ks.some(k=>K[k])}
 let mouseShoot=false;
-C.addEventListener('mousedown',e=>{mouseShoot=true;e.preventDefault()});
+C.addEventListener('mousedown',e=>{
+  const r=C.getBoundingClientRect();
+  const cx=(e.clientX-r.left)*(W/r.width),cy=(e.clientY-r.top)*(H/r.height);
+  // Mute icon hitbox (bottom-left)
+  if(cx<40&&cy>H-40){toggleMute();initAudio();e.preventDefault();return}
+  mouseShoot=true;e.preventDefault();
+});
 addEventListener('mouseup',()=>{mouseShoot=false});
 C.addEventListener('contextmenu',e=>e.preventDefault());
 
@@ -87,7 +87,7 @@ function distPtSeg(px,py,x1,y1,x2,y2){const dx=x2-x1,dy=y2-y1,L2=dx*dx+dy*dy;let
 
 /* ===== AUDIO ===== */
 let AC=null,master=null,musicGain=null;
-function initAudio(){if(AC)return;AC=new(window.AudioContext||window.webkitAudioContext)();master=AC.createGain();master.gain.value=.35;master.connect(AC.destination);musicGain=AC.createGain();musicGain.gain.value=.55;musicGain.connect(master);startMusic()}
+function initAudio(){if(AC)return;AC=new(window.AudioContext||window.webkitAudioContext)();master=AC.createGain();master.gain.value=muted?0:.35;master.connect(AC.destination);musicGain=AC.createGain();musicGain.gain.value=muted?0:.55;musicGain.connect(master);startMusic()}
 addEventListener('keydown',initAudio,{once:true});
 addEventListener('click',initAudio,{once:true});
 function sfx(f,d=.08,t='square',v=.25,s=0){if(!AC)return;const o=AC.createOscillator(),g=AC.createGain();o.type=t;const tt=AC.currentTime;o.frequency.setValueAtTime(f,tt);if(s)o.frequency.exponentialRampToValueAtTime(Math.max(40,f+s),tt+d);g.gain.setValueAtTime(v,tt);g.gain.exponentialRampToValueAtTime(.0008,tt+d);o.connect(g);g.connect(master);o.start(tt);o.stop(tt+d+.02)}
@@ -264,6 +264,11 @@ const boss={x:700,y:240,baseY:240,w:140,h:200,hp:0,maxHp:0,bob:0,state:'intro',s
 
 let state='title';
 let titlePulse=0,flash=0,slowmo=0,shakeT=0,shakeMag=0,timeT=0,cinematicT=60;
+let muted=false;try{muted=localStorage.getItem('cb_mute')==='1'}catch(e){}
+let paused=false;
+let tutorialDone=false;try{tutorialDone=localStorage.getItem('cb_tutorial')==='1'}catch(e){}
+let tutorialStep=0,tutT=0,tutStepStart=0;
+function toggleMute(){muted=!muted;try{localStorage.setItem('cb_mute',muted?'1':'0')}catch(e){}if(master)master.gain.value=muted?0:.35;if(musicGain)musicGain.gain.value=muted?0:.55}
 function shake(t,m){shakeT=Math.max(shakeT,t);shakeMag=Math.max(shakeMag,m)}
 
 /* ===== LOAD BOSS ===== */
@@ -1767,6 +1772,124 @@ function renderScene(){
   drawHUD();
 }
 
+/* ===== MUTE ICON / PAUSE OVERLAY ===== */
+function drawMuteIcon(){
+  const x=8,y=H-32,s=24;
+  X.fillStyle='rgba(20,10,16,.7)';
+  X.fillRect(x,y,s,s);
+  X.strokeStyle='#ffce6b';X.lineWidth=1.5;X.strokeRect(x,y,s,s);
+  X.fillStyle='#ffce6b';
+  // Speaker box
+  X.fillRect(x+5,y+10,4,6);
+  X.beginPath();X.moveTo(x+9,y+10);X.lineTo(x+14,y+5);X.lineTo(x+14,y+21);X.lineTo(x+9,y+16);X.closePath();X.fill();
+  if(muted){
+    X.strokeStyle='#ff5050';X.lineWidth=2.5;
+    X.beginPath();X.moveTo(x+16,y+7);X.lineTo(x+22,y+19);X.stroke();
+    X.beginPath();X.moveTo(x+22,y+7);X.lineTo(x+16,y+19);X.stroke();
+  } else {
+    X.strokeStyle='#ffce6b';X.lineWidth=1.5;
+    X.beginPath();X.arc(x+15,y+13,4,-.7,.7);X.stroke();
+    X.beginPath();X.arc(x+15,y+13,7,-.7,.7);X.stroke();
+  }
+}
+function drawPauseOverlay(){
+  X.fillStyle='rgba(10,5,10,.78)';X.fillRect(0,0,W,H);
+  X.fillStyle='#ffce6b';X.font='bold 64px ui-sans-serif,system-ui';X.textAlign='center';
+  X.fillText('PAUSA',W/2,H/2-30);
+  X.font='bold 18px ui-sans-serif';X.fillStyle='#f6e2c0';
+  X.fillText('ESC / P  para reanudar',W/2,H/2+20);
+  X.fillText('Q  para volver al mapa',W/2,H/2+50);
+  X.fillText('M  para silenciar',W/2,H/2+80);
+  X.textAlign='left';
+}
+
+/* ===== TUTORIAL ===== */
+function startTutorial(){
+  state='tutorial';tutorialStep=0;tutT=0;tutStepStart=0;
+  player.x=200;player.y=380;player.vx=0;player.vy=0;player.facing=1;
+  player.hp=player.maxHp;player.iframes=0;player.alive=true;
+  player.parryPoints=0;player.superReadyPulse=0;player.dashCd=0;player.shootCd=0;
+  player.movedH=false;player.hasJumped=false;player.hasShot=false;player.hasSupered=false;
+  bullets.length=0;ebullets.length=0;particles.length=0;sparks.length=0;
+  // Fake boss config for renderScene compatibility
+  boss.alive=false;boss.config=null;boss.biome=0;
+}
+function spawnTutOrb(x,y){
+  ebullets.push({x,y,vx:-2-Math.random(),vy:0,r:13,life:600,parryable:true,type:'orb',age:0,baseY:y});
+}
+function finishTutorial(){
+  tutorialDone=true;try{localStorage.setItem('cb_tutorial','1')}catch(e){}
+  state='map';
+}
+function updateTutorial(){
+  tutT++;
+  updatePlayer();
+  // Detect actions
+  if(Math.abs(player.vx)>1.5)player.movedH=true;
+  if(!player.onGround&&player.vy<-3)player.hasJumped=true;
+  if(bullets.length>0)player.hasShot=true;
+  // Step progression
+  const s=tutorialStep;
+  let advance=false;
+  if(s===0&&player.movedH&&tutT>tutStepStart+30)advance=true;
+  else if(s===1&&player.hasJumped&&tutT>tutStepStart+30)advance=true;
+  else if(s===2&&player.hasShot&&tutT>tutStepStart+45)advance=true;
+  else if(s===3){
+    if(ebullets.filter(b=>b.type==='orb').length<1&&tutT>tutStepStart+20)spawnTutOrb(680,280);
+    if(player.parryPoints>=1)advance=true;
+  }
+  else if(s===4){
+    const orbs=ebullets.filter(b=>b.type==='orb').length;
+    if(player.parryPoints<3&&orbs+player.parryPoints<3&&tutT%90===0)spawnTutOrb(640+Math.random()*180,250+Math.random()*70);
+    if(player.parryPoints>=3)advance=true;
+  }
+  else if(s===5){
+    if(consume('l')&&player.parryPoints>=3){
+      // Fake super FX
+      flash=30;shake(30,10);slowmo=20;
+      for(let i=0;i<80;i++){const a=Math.random()*Math.PI*2,sp=rand(2,10);particles.push({x:player.x+player.w/2+Math.cos(a)*8,y:player.y+20+Math.sin(a)*8,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:60,maxLife:60,c:i%2===0?'#ff6fb3':'#ffce6b',r:5,g:.1})}
+      sfx(110,.4,'sawtooth',.35,600);sfx(220,.3,'square',.25,800);noise(.4,.25);
+      player.parryPoints=0;player.hasSupered=true;
+      advance=true;
+    }
+  }
+  if(advance){tutorialStep++;tutStepStart=tutT}
+  updateBullets();updateParticles();
+}
+function renderTutorial(){
+  // shake
+  let ox=0,oy=0;
+  if(shakeT>0){ox=(Math.random()*2-1)*shakeMag;oy=(Math.random()*2-1)*shakeMag;shakeT--;if(shakeT<=0)shakeMag=0}
+  X.save();X.translate(ox,oy);
+  drawBgDesert(); // Neon city as backdrop
+  drawParticles();drawBullets();drawPlayer();
+  X.restore();
+  if(flash>0){X.fillStyle='rgba(255,255,255,'+(flash/30)+')';X.fillRect(0,0,W,H);flash--}
+  // HUD: hearts + parry points
+  for(let i=0;i<player.maxHp;i++){X.fillStyle=i<player.hp?'#ff5a6b':'#3a1a20';drawHeart(20+i*28,22,11)}
+  X.font='bold 10px ui-monospace,monospace';X.fillStyle='#ffce6b';X.fillText('PARRY',20,60);
+  for(let i=0;i<player.maxParry;i++){const cx=72+i*24,cy=56,filled=i<player.parryPoints;X.fillStyle=filled?'#ff6fb3':'#3a1a20';X.beginPath();X.arc(cx,cy,9,0,Math.PI*2);X.fill();X.strokeStyle='#ff6fb3';X.lineWidth=1.5;X.beginPath();X.arc(cx,cy,9,0,Math.PI*2);X.stroke();if(filled){X.fillStyle='#ffd7e8';X.beginPath();X.arc(cx-2.5,cy-2.5,3,0,Math.PI*2);X.fill()}}
+  // Tutorial banner
+  const steps=[
+    'PASO 1 / 6  ·  Muévete con  A  /  D  (o las flechas)',
+    'PASO 2 / 6  ·  Salta con  W  o  Espacio',
+    'PASO 3 / 6  ·  Dispara con  J  o  click izquierdo',
+    'PASO 4 / 6  ·  Salta sobre el proyectil ROSA para hacer PARRY',
+    'PASO 5 / 6  ·  Acumula los 3 puntos de PARRY rosa',
+    'PASO 6 / 6  ·  Pulsa  L  para usar el SUPER',
+    '¡LISTO!  Pulsa  ENTER  para ir al mapa de jefes'
+  ];
+  const s=Math.min(tutorialStep,steps.length-1);
+  X.fillStyle='rgba(10,5,10,.78)';X.fillRect(0,H/2-50,W,90);
+  X.strokeStyle='#ffce6b';X.lineWidth=2;X.strokeRect(0,H/2-50,W,90);
+  X.fillStyle=tutorialStep>=steps.length-1?'#ff6fb3':'#ffce6b';
+  X.font='bold 22px ui-sans-serif,system-ui';X.textAlign='center';
+  X.fillText(steps[s],W/2,H/2+5);
+  X.fillStyle='#caa57e';X.font='12px ui-sans-serif,system-ui';
+  X.fillText('Pulsa  S  para saltar el tutorial',W/2,H/2+30);
+  X.textAlign='left';
+}
+
 /* ===== STATE TRANSITIONS ===== */
 function onBossDefeated(){
   const id=boss.config.id;
@@ -1781,21 +1904,33 @@ function onBossDefeated(){
 function loop(){
   timeT++;titlePulse++;
   pollGamepad();
+  // Global mute toggle (M key)
+  if(consume('m'))toggleMute();
   if(state==='title'){
     drawTitle();
+    drawMuteIcon();
     drawGamepadToast();
-    if(consume('enter')){state='map'}
-    if(consume('r')){resetProgress()}
+    if(consume('enter')){if(!tutorialDone)startTutorial();else state='map'}
+    if(consume('r')){resetProgress();tutorialDone=false;try{localStorage.removeItem('cb_tutorial')}catch(e){}}
+    requestAnimationFrame(loop);return;
+  }
+  if(state==='tutorial'){
+    updateTutorial();
+    renderTutorial();
+    drawMuteIcon();
+    drawGamepadToast();
+    if(consume('s'))finishTutorial();
+    if(tutorialStep>=6&&consume('enter'))finishTutorial();
     requestAnimationFrame(loop);return;
   }
   if(state==='map'){
     drawMap();
+    drawMuteIcon();
     drawGamepadToast();
-    // Cursor navigation
     if(consume('arrowleft')||consume('a'))  mapCursor=mapCursor>1?mapCursor-1:FINAL_ID;
     if(consume('arrowright')||consume('d')) mapCursor=mapCursor<FINAL_ID?mapCursor+1:1;
     if(consume('arrowup')||consume('w'))    mapCursor=Math.min(FINAL_ID,mapCursor+8);
-    if(consume('arrowdown')||consume('s'))  mapCursor=Math.max(1,mapCursor-8);
+    if(consume('arrowdown'))                mapCursor=Math.max(1,mapCursor-8);
     if(consume('enter'))startFight(mapCursor);
     if(consume('escape'))state='title';
     if(consume('r'))resetProgress();
@@ -1807,16 +1942,24 @@ function loop(){
     if(state==='win')drawWin();
     else if(state==='lose')drawLose();
     else drawFinalWin();
+    drawMuteIcon();
     drawGamepadToast();
     if(consume('enter')){state=(state==='final_win')?'title':'map'}
     requestAnimationFrame(loop);return;
   }
-  // fight
+  // FIGHT — pause handling
+  if(paused){
+    renderScene();drawPauseOverlay();drawMuteIcon();drawGamepadToast();
+    if(consume('escape')||consume('p'))paused=false;
+    if(consume('q')){paused=false;state='map'}
+    requestAnimationFrame(loop);return;
+  }
+  if(consume('escape')||consume('p')){paused=true;requestAnimationFrame(loop);return}
   if(slowmo>0)slowmo--;
   updatePlayer();updateBoss();updateBullets();updateParticles();
   renderScene();
+  drawMuteIcon();
   drawGamepadToast();
-  if(consume('escape'))state='map';
   requestAnimationFrame(loop);
 }
 
