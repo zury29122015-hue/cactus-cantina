@@ -1627,19 +1627,15 @@ function drawTitle(){
   drawBgDesert();
   X.save();X.fillStyle='#1a0a14cc';X.fillRect(0,0,W,H);
   X.fillStyle='#ffce6b';X.font='bold 56px ui-sans-serif,system-ui';X.textAlign='center';
-  X.fillText('CACTUS CANTINA',W/2+Math.sin(titlePulse*.05)*2,180);
-  X.fillStyle='#ff6fb3';X.font='bold 20px ui-sans-serif,system-ui';
-  X.fillText('CAZADOR DE BANDOLEROS — 50 jefes hasta la nave alienígena',W/2,212);
-  X.fillStyle='#f6e2c0';X.font='15px ui-sans-serif,system-ui';
-  X.fillText('A/D mover · W salto · Shift dash · J/click disparar',W/2,290);
-  X.fillText('K parry (rosas) · L SUPER (3 parries → ½ vida del jefe)',W/2,316);
+  X.fillText('CAZADOR DE',W/2+Math.sin(titlePulse*.05)*2,200);
+  X.fillText('BANDOLEROS',W/2+Math.sin(titlePulse*.05)*2,260);
+  X.fillStyle='#ff6fb3';X.font='bold 18px ui-sans-serif,system-ui';
+  X.fillText('50 jefes · 6 mundos · 1 nave alienígena',W/2,300);
   const def=progress.defeated.length;
   X.fillStyle='#caa57e';X.font='14px ui-sans-serif,system-ui';
-  X.fillText('Progreso: '+def+' / 50 jefes derrotados',W/2,360);
+  X.fillText('Progreso: '+def+' / 50',W/2,360);
   X.fillStyle=(Math.floor(titlePulse/20)%2===0)?'#ffce6b':'#d97742';X.font='bold 22px ui-sans-serif,system-ui';
-  X.fillText('— ENTER para ir al mapa —',W/2,420);
-  X.fillStyle='#6b4a36';X.font='12px ui-sans-serif,system-ui';
-  X.fillText('R: borrar partida y empezar de cero',W/2,460);
+  X.fillText('— ENTER para empezar —',W/2,430);
   X.textAlign='left';X.restore();
 }
 
@@ -1869,7 +1865,7 @@ function renderTutorial(){
   for(let i=0;i<player.maxHp;i++){X.fillStyle=i<player.hp?'#ff5a6b':'#3a1a20';drawHeart(20+i*28,22,11)}
   X.font='bold 10px ui-monospace,monospace';X.fillStyle='#ffce6b';X.fillText('PARRY',20,60);
   for(let i=0;i<player.maxParry;i++){const cx=72+i*24,cy=56,filled=i<player.parryPoints;X.fillStyle=filled?'#ff6fb3':'#3a1a20';X.beginPath();X.arc(cx,cy,9,0,Math.PI*2);X.fill();X.strokeStyle='#ff6fb3';X.lineWidth=1.5;X.beginPath();X.arc(cx,cy,9,0,Math.PI*2);X.stroke();if(filled){X.fillStyle='#ffd7e8';X.beginPath();X.arc(cx-2.5,cy-2.5,3,0,Math.PI*2);X.fill()}}
-  // Tutorial banner
+  // Tutorial banner at TOP
   const steps=[
     'PASO 1 / 6  ·  Muévete con  A  /  D  (o las flechas)',
     'PASO 2 / 6  ·  Salta con  W  o  Espacio',
@@ -1877,16 +1873,27 @@ function renderTutorial(){
     'PASO 4 / 6  ·  Salta sobre el proyectil ROSA para hacer PARRY',
     'PASO 5 / 6  ·  Acumula los 3 puntos de PARRY rosa',
     'PASO 6 / 6  ·  Pulsa  L  para usar el SUPER',
-    '¡LISTO!  Pulsa  ENTER  para ir al mapa de jefes'
+    '¡LISTO!  —  ENTER para ir al mapa de jefes'
   ];
   const s=Math.min(tutorialStep,steps.length-1);
-  X.fillStyle='rgba(10,5,10,.78)';X.fillRect(0,H/2-50,W,90);
-  X.strokeStyle='#ffce6b';X.lineWidth=2;X.strokeRect(0,H/2-50,W,90);
-  X.fillStyle=tutorialStep>=steps.length-1?'#ff6fb3':'#ffce6b';
-  X.font='bold 22px ui-sans-serif,system-ui';X.textAlign='center';
-  X.fillText(steps[s],W/2,H/2+5);
-  X.fillStyle='#caa57e';X.font='12px ui-sans-serif,system-ui';
-  X.fillText('Pulsa  S  para saltar el tutorial',W/2,H/2+30);
+  const finalStep=tutorialStep>=steps.length-1;
+  // Top banner
+  X.fillStyle='rgba(10,5,10,.82)';X.fillRect(0,0,W,70);
+  X.strokeStyle=finalStep?'#ff6fb3':'#ffce6b';X.lineWidth=3;X.beginPath();X.moveTo(0,70);X.lineTo(W,70);X.stroke();
+  X.fillStyle=finalStep?'#ff6fb3':'#ffce6b';
+  X.font='bold 20px ui-sans-serif,system-ui';X.textAlign='center';
+  X.fillText(steps[s],W/2,38);
+  X.fillStyle='#caa57e';X.font='11px ui-sans-serif,system-ui';
+  X.fillText('Pulsa S para saltar el tutorial',W/2,60);
+  // Big ENTER prompt on final step
+  if(finalStep){
+    const blink=Math.floor(timeT/10)%2===0;
+    X.fillStyle=blink?'#ff6fb3':'#ffce6b';
+    X.font='bold 48px ui-sans-serif,system-ui';
+    X.fillText('▶  PULSA  ENTER  ◀',W/2,H/2+80);
+    X.fillStyle='#caa57e';X.font='14px ui-sans-serif,system-ui';
+    X.fillText('(o presiona Options en el control)',W/2,H/2+110);
+  }
   X.textAlign='left';
 }
 
@@ -1920,7 +1927,9 @@ function loop(){
     drawMuteIcon();
     drawGamepadToast();
     if(consume('s'))finishTutorial();
-    if(tutorialStep>=6&&consume('enter'))finishTutorial();
+    if(tutorialStep>=6&&(consume('enter')||consume(' ')))finishTutorial();
+    // Auto-finish after 8s on final step in case player doesn't press Enter
+    if(tutorialStep>=6&&tutT>tutStepStart+480)finishTutorial();
     requestAnimationFrame(loop);return;
   }
   if(state==='map'){
