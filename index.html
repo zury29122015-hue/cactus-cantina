@@ -74,6 +74,8 @@ C.addEventListener('mousedown',e=>{
   const cx=(e.clientX-r.left)*(W/r.width),cy=(e.clientY-r.top)*(H/r.height);
   // Mute icon hitbox (bottom-left)
   if(cx<40&&cy>H-40){toggleMute();initAudio();e.preventDefault();return}
+  // Tutorial button hitbox (top-left) — only on title/map
+  if(cx<110&&cy<40&&(state==='title'||state==='map')){startTutorial();initAudio();e.preventDefault();return}
   mouseShoot=true;e.preventDefault();
 });
 addEventListener('mouseup',()=>{mouseShoot=false});
@@ -1771,6 +1773,18 @@ function renderScene(){
 }
 
 /* ===== MUTE ICON / PAUSE OVERLAY ===== */
+function drawTutorialButton(){
+  const x=8,y=8,w=100,h=28;
+  X.fillStyle='rgba(20,10,16,.75)';X.fillRect(x,y,w,h);
+  X.strokeStyle='#ffce6b';X.lineWidth=2;X.strokeRect(x,y,w,h);
+  // book icon
+  X.fillStyle='#ffce6b';
+  X.fillRect(x+8,y+7,14,14);
+  X.fillStyle='#1a0a14';X.fillRect(x+10,y+9,10,2);X.fillRect(x+10,y+12,10,2);X.fillRect(x+10,y+15,7,2);
+  // text
+  X.fillStyle='#ffce6b';X.font='bold 12px ui-sans-serif,system-ui';
+  X.fillText('TUTORIAL',x+28,y+19);
+}
 function drawMuteIcon(){
   const x=8,y=H-32,s=24;
   X.fillStyle='rgba(20,10,16,.7)';
@@ -1917,6 +1931,7 @@ function loop(){
   if(consume('m'))toggleMute();
   if(state==='title'){
     drawTitle();
+    drawTutorialButton();
     drawMuteIcon();
     drawGamepadToast();
     if(consume('enter')){if(!tutorialDone)startTutorial();else state='map'}
@@ -1937,6 +1952,7 @@ function loop(){
   }
   if(state==='map'){
     drawMap();
+    drawTutorialButton();
     drawMuteIcon();
     drawGamepadToast();
     if(consume('arrowleft')||consume('a'))  mapCursor=mapCursor>1?mapCursor-1:FINAL_ID;
