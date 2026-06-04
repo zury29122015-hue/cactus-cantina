@@ -1985,26 +1985,18 @@ function renderTutorial(){
     'PASO 6 / 6  ·  Pulsa  L  para usar el SUPER',
     '¡LISTO!  —  ENTER para ir al mapa de jefes'
   ];
-  const s=Math.min(tutorialStep,steps.length-1);
-  const finalStep=tutorialStep>=steps.length-1;
-  // Top banner
-  X.fillStyle='rgba(10,5,10,.82)';X.fillRect(0,0,W,70);
-  X.strokeStyle=finalStep?'#ff6fb3':'#ffce6b';X.lineWidth=3;X.beginPath();X.moveTo(0,70);X.lineTo(W,70);X.stroke();
-  X.fillStyle=finalStep?'#ff6fb3':'#ffce6b';
-  X.font='bold 20px ui-sans-serif,system-ui';X.textAlign='center';
-  X.fillText(steps[s],W/2,38);
-  X.fillStyle='#caa57e';X.font='11px ui-sans-serif,system-ui';
-  X.fillText('Pulsa S para saltar el tutorial',W/2,60);
-  // Big ENTER prompt on final step
-  if(finalStep){
-    const blink=Math.floor(timeT/10)%2===0;
-    X.fillStyle=blink?'#ff6fb3':'#ffce6b';
-    X.font='bold 48px ui-sans-serif,system-ui';
-    X.fillText('▶  PULSA  ENTER  ◀',W/2,H/2+80);
-    X.fillStyle='#caa57e';X.font='14px ui-sans-serif,system-ui';
-    X.fillText('(o presiona Options en el control)',W/2,H/2+110);
+  // Banner solo durante pasos 1-5 (oculto en paso 6 mientras se ejecuta el FX del super)
+  if(tutorialStep<6){
+    const s=Math.min(tutorialStep,steps.length-1);
+    X.fillStyle='rgba(10,5,10,.82)';X.fillRect(0,0,W,70);
+    X.strokeStyle='#ffce6b';X.lineWidth=3;X.beginPath();X.moveTo(0,70);X.lineTo(W,70);X.stroke();
+    X.fillStyle='#ffce6b';
+    X.font='bold 20px ui-sans-serif,system-ui';X.textAlign='center';
+    X.fillText(steps[s],W/2,38);
+    X.fillStyle='#caa57e';X.font='11px ui-sans-serif,system-ui';
+    X.fillText('Pulsa S para saltar el tutorial',W/2,60);
+    X.textAlign='left';
   }
-  X.textAlign='left';
 }
 
 /* ===== STATE TRANSITIONS ===== */
@@ -2039,9 +2031,8 @@ function loop(){
     drawMuteIcon();
     drawGamepadToast();
     if(consume('s'))finishTutorial();
-    if(tutorialStep>=6&&(consume('enter')||consume(' ')))finishTutorial();
-    // Auto-finish after 8s on final step in case player doesn't press Enter
-    if(tutorialStep>=6&&tutT>tutStepStart+480)finishTutorial();
+    // Auto-finish ~0.5s after super FX so splash appears right after pressing L
+    if(tutorialStep>=6&&tutT>tutStepStart+30)finishTutorial();
     requestAnimationFrame(loop);return;
   }
   if(state==='splash'){
