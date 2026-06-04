@@ -339,6 +339,7 @@ function tryShoot(){
 function trySuper(){
   if(player.parryPoints<player.maxParry)return;
   player.parryPoints=0;player.superReadyPulse=0;
+  player.didSuper=true; // for tutorial detection
   boss.invuln=0;
   const ratio=(boss.config&&boss.config.superRatio)||0.50;
   hurtBoss(Math.ceil(boss.maxHp*ratio));
@@ -1822,7 +1823,7 @@ function startTutorial(){
   player.x=200;player.y=380;player.vx=0;player.vy=0;player.facing=1;
   player.hp=player.maxHp;player.iframes=0;player.alive=true;
   player.parryPoints=0;player.superReadyPulse=0;player.dashCd=0;player.shootCd=0;
-  player.movedH=false;player.hasJumped=false;player.hasShot=false;player.hasSupered=false;
+  player.movedH=false;player.hasJumped=false;player.hasShot=false;player.hasSupered=false;player.didSuper=false;
   bullets.length=0;ebullets.length=0;particles.length=0;sparks.length=0;
   // Fake boss config for renderScene compatibility
   boss.alive=false;boss.config=null;boss.biome=0;
@@ -1950,12 +1951,9 @@ function updateTutorial(){
     if(player.parryPoints>=3)advance=true;
   }
   else if(s===5){
-    if(consume('l')&&player.parryPoints>=3){
-      // Fake super FX
-      flash=30;shake(30,10);slowmo=20;
-      for(let i=0;i<80;i++){const a=Math.random()*Math.PI*2,sp=rand(2,10);particles.push({x:player.x+player.w/2+Math.cos(a)*8,y:player.y+20+Math.sin(a)*8,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:60,maxLife:60,c:i%2===0?'#ff6fb3':'#ffce6b',r:5,g:.1})}
-      sfx(110,.4,'sawtooth',.35,600);sfx(220,.3,'square',.25,800);noise(.4,.25);
-      player.parryPoints=0;player.hasSupered=true;
+    // trySuper (llamado desde updatePlayer) ya hizo el FX y reset; solo detectamos el flag
+    if(player.didSuper){
+      player.didSuper=false;
       advance=true;
     }
   }
