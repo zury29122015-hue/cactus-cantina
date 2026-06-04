@@ -270,6 +270,7 @@ let muted=false;try{muted=localStorage.getItem('cb_mute')==='1'}catch(e){}
 let paused=false;
 let tutorialDone=false;try{tutorialDone=localStorage.getItem('cb_tutorial')==='1'}catch(e){}
 let tutorialStep=0,tutT=0,tutStepStart=0;
+let splashT=0;let bloodDrips=[];let bloodSplats=[];
 function toggleMute(){muted=!muted;try{localStorage.setItem('cb_mute',muted?'1':'0')}catch(e){}if(master)master.gain.value=muted?0:.35;if(musicGain)musicGain.gain.value=muted?0:.55}
 function shake(t,m){shakeT=Math.max(shakeT,t);shakeMag=Math.max(shakeMag,m)}
 
@@ -1831,7 +1832,100 @@ function spawnTutOrb(x,y){
 }
 function finishTutorial(){
   tutorialDone=true;try{localStorage.setItem('cb_tutorial','1')}catch(e){}
-  state='map';
+  startSplash();
+}
+
+function startSplash(){
+  state='splash';splashT=0;bloodDrips=[];bloodSplats=[];
+  // Drips bajo línea 1 (CAZADOR DE)
+  for(let i=0;i<22;i++){
+    bloodDrips.push({
+      x:W/2-280+i*26+(Math.random()*14-7),
+      y:H/2-30,
+      maxLen:50+Math.random()*150,
+      speed:.3+Math.random()*.7,
+      drop:3+Math.random()*4,
+      delay:Math.random()*40
+    });
+  }
+  // Drips bajo línea 2 (BANDOLEROS)
+  for(let i=0;i<26;i++){
+    bloodDrips.push({
+      x:W/2-320+i*25+(Math.random()*14-7),
+      y:H/2+60,
+      maxLen:60+Math.random()*180,
+      speed:.3+Math.random()*.7,
+      drop:3+Math.random()*4,
+      delay:Math.random()*40
+    });
+  }
+  // Splatters
+  for(let i=0;i<50;i++){
+    bloodSplats.push({
+      x:Math.random()*W,
+      y:Math.random()*H,
+      r:1+Math.random()*6,
+      shade:Math.random()<.5?'#3a0000':'#5a0808'
+    });
+  }
+}
+
+function drawSplash(){
+  splashT++;
+  // Black background con leves manchas
+  X.fillStyle='#0a0000';X.fillRect(0,0,W,H);
+  // Manchas oscuras de fondo
+  for(let i=0;i<8;i++){
+    X.fillStyle='rgba(58,0,0,.4)';
+    X.beginPath();X.arc((i*131)%W,(i*97)%H,60+(i*23)%80,0,Math.PI*2);X.fill();
+  }
+  // Splatters
+  for(const s of bloodSplats){
+    X.fillStyle=s.shade;
+    X.beginPath();X.arc(s.x,s.y,s.r,0,Math.PI*2);X.fill();
+  }
+  // Drips (debajo del texto, gotas que crecen)
+  for(const d of bloodDrips){
+    const t=Math.max(0,splashT-d.delay);
+    const len=Math.min(t*d.speed,d.maxLen);
+    if(len<=0)continue;
+    X.fillStyle='#7a0808';
+    X.fillRect(d.x-1.5,d.y,3,len);
+    X.fillStyle='#a01010';
+    X.fillRect(d.x-1,d.y,2,len);
+    if(len>15){
+      X.fillStyle='#a01010';
+      X.beginPath();X.arc(d.x,d.y+len,d.drop,0,Math.PI*2);X.fill();
+      X.fillStyle='#c8323a';
+      X.beginPath();X.arc(d.x-d.drop*.3,d.y+len-d.drop*.3,d.drop*.4,0,Math.PI*2);X.fill();
+    }
+  }
+  // Título con sangre (capas para profundidad)
+  X.save();X.textAlign='center';
+  X.font='bold 86px Georgia, "Times New Roman", serif';
+  const line1='CAZADOR DE',line2='BANDOLEROS';
+  const y1=H/2-50,y2=H/2+40;
+  // Sombra negra
+  X.fillStyle='#000';X.fillText(line1,W/2+8,y1+8);X.fillText(line2,W/2+8,y2+8);
+  // Sangre profunda
+  X.fillStyle='#3a0000';X.fillText(line1,W/2+5,y1+5);X.fillText(line2,W/2+5,y2+5);
+  // Sangre media
+  X.fillStyle='#7a0808';X.fillText(line1,W/2+2,y1+2);X.fillText(line2,W/2+2,y2+2);
+  // Sangre brillante
+  X.fillStyle='#a01010';X.fillText(line1,W/2,y1);X.fillText(line2,W/2,y2);
+  // Brillo carmesí
+  X.fillStyle='#c8323a';X.fillText(line1,W/2-1,y1-1);X.fillText(line2,W/2-1,y2-1);
+  X.restore();
+  // Pulso oscuro overlay
+  X.fillStyle='rgba(10,0,0,'+(.15+Math.sin(splashT*.1)*.1)+')';
+  X.fillRect(0,0,W,H);
+  // Continue prompt
+  if(splashT>120){
+    X.fillStyle=Math.floor(splashT/12)%2===0?'#c8323a':'#7a0808';
+    X.font='bold 22px Georgia, serif';X.textAlign='center';
+    X.fillText('— ENTER —',W/2,H-50);
+    X.textAlign='left';
+  }
 }
 function updateTutorial(){
   tutT++;
@@ -1948,6 +2042,14 @@ function loop(){
     if(tutorialStep>=6&&(consume('enter')||consume(' ')))finishTutorial();
     // Auto-finish after 8s on final step in case player doesn't press Enter
     if(tutorialStep>=6&&tutT>tutStepStart+480)finishTutorial();
+    requestAnimationFrame(loop);return;
+  }
+  if(state==='splash'){
+    drawSplash();
+    drawMuteIcon();
+    drawGamepadToast();
+    if(splashT>120&&(consume('enter')||consume(' ')))state='map';
+    if(splashT>540)state='map'; // auto-advance after 9s
     requestAnimationFrame(loop);return;
   }
   if(state==='map'){
