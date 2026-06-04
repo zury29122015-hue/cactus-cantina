@@ -1636,6 +1636,8 @@ function drawTitle(){
   X.fillText('Progreso: '+def+' / 50',W/2,360);
   X.fillStyle=(Math.floor(titlePulse/20)%2===0)?'#ffce6b':'#d97742';X.font='bold 22px ui-sans-serif,system-ui';
   X.fillText('— ENTER para empezar —',W/2,430);
+  X.fillStyle='#6b4a36';X.font='11px ui-sans-serif,system-ui';
+  X.fillText('T: tutorial   ·   R: reiniciar progreso',W/2,470);
   X.textAlign='left';X.restore();
 }
 
@@ -1918,6 +1920,7 @@ function loop(){
     drawMuteIcon();
     drawGamepadToast();
     if(consume('enter')){if(!tutorialDone)startTutorial();else state='map'}
+    if(consume('t'))startTutorial();
     if(consume('r')){resetProgress();tutorialDone=false;try{localStorage.removeItem('cb_tutorial')}catch(e){}}
     requestAnimationFrame(loop);return;
   }
