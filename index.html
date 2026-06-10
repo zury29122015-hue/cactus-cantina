@@ -64,6 +64,10 @@
 <script>
 'use strict';
 const C=document.getElementById('game'),X=C.getContext('2d'),W=C.width,H=C.height,GROUND=470;
+// ===== BOSS PORTRAITS — arte oficial de Canva (jefes 1-10) =====
+const BOSS_PORTRAITS={};
+for(let i=1;i<=10;i++){const im=new Image();im.src='art/boss'+String(i).padStart(2,'0')+'.png';BOSS_PORTRAITS[i]=im;}
+function bossPortrait(id){const im=BOSS_PORTRAITS[id];return (im&&im.complete&&im.naturalWidth>0)?im:null;}
 const K={},pressed={};
 addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(!K[k])pressed[k]=true;K[k]=true;if(['arrowleft','arrowright','arrowup','arrowdown',' '].includes(k))e.preventDefault()});
 addEventListener('keyup',e=>{K[e.key.toLowerCase()]=false});
@@ -1724,6 +1728,21 @@ function drawMap(){
     }
     if(pos.final&&!isSelected){X.fillStyle='#ff6fb3';X.font='bold 11px ui-sans-serif,system-ui';X.textAlign='center';X.fillText('JEFE FINAL',pos.x,pos.y-r-8);X.textAlign='left'}
   }
+  // vista previa del arte oficial del jefe seleccionado
+  const selImg=bossPortrait(mapCursor);
+  if(selImg){
+    const pw=120,ph=pw*selImg.naturalHeight/selImg.naturalWidth;
+    const px=W-pw-18,py=64,scfg=CFGS.find(c=>c.id===mapCursor);
+    X.save();
+    X.shadowColor=scfg?scfg.palette.p:'#ffce6b';X.shadowBlur=18;
+    X.fillStyle='#1a0a14';X.fillRect(px-5,py-5,pw+10,ph+10);
+    X.shadowBlur=0;
+    X.drawImage(selImg,px,py,pw,ph);
+    X.strokeStyle=scfg?scfg.palette.a:'#ffce6b';X.lineWidth=2;X.strokeRect(px-5,py-5,pw+10,ph+10);
+    X.restore();
+    X.fillStyle='#ffce6b';X.font='bold 10px ui-monospace,monospace';X.textAlign='center';
+    X.fillText('ARTE OFICIAL',px+pw/2,py+ph+16);X.textAlign='left';
+  }
 }
 
 function drawWin(){
@@ -1773,6 +1792,51 @@ function renderScene(){
   X.restore();
   if(flash>0){X.fillStyle='rgba(255,255,255,'+(flash/30)+')';X.fillRect(0,0,W,H);flash--}
   drawHUD();
+  if(boss.state==='intro')drawBossIntroCard();
+}
+
+/* ===== TARJETA DE PRESENTACIÓN DEL JEFE (arte de Canva) ===== */
+function drawBossIntroCard(){
+  const id=boss.config&&boss.config.id;
+  const img=bossPortrait(id);
+  if(!img)return;
+  const st=boss.stateTime;                 // 80 -> 0
+  const inP=clamp((80-st)/18,0,1);         // animación de entrada 0..1
+  const ease=1-Math.pow(1-inP,3);
+  const p=boss.palette;
+  // oscurecer la escena
+  X.fillStyle='rgba(8,4,10,'+(0.62*ease)+')';X.fillRect(0,0,W,H);
+  // retrato deslizando desde la derecha
+  const ih=430, iw=ih*img.naturalWidth/img.naturalHeight;
+  const restX=W-iw-64, ix=lerp(W+40,restX,ease), iy=(H-ih)/2;
+  X.save();
+  X.shadowColor=p.p;X.shadowBlur=30;
+  X.fillStyle=p.s;X.fillRect(ix-8,iy-8,iw+16,ih+16);
+  X.shadowBlur=0;
+  X.drawImage(img,ix,iy,iw,ih);
+  X.strokeStyle=p.a;X.lineWidth=3;X.strokeRect(ix-8,iy-8,iw+16,ih+16);
+  X.strokeStyle='#000';X.lineWidth=2;X.strokeRect(ix,iy,iw,ih);
+  X.restore();
+  // bloque de texto deslizando desde la izquierda
+  const tx=lerp(-320,64,ease), cy=H/2;
+  const biomeName=((BIOMES[boss.biome||0])||{}).name||'';
+  X.textAlign='left';
+  X.fillStyle=p.a;X.font='bold 14px ui-monospace,monospace';
+  X.fillText(biomeName,tx,cy-72);
+  X.fillStyle='#caa57e';X.font='bold 15px ui-sans-serif,system-ui';
+  X.fillText('JEFE  '+id+' / 50',tx,cy-48);
+  X.font='bold 40px ui-sans-serif,system-ui';
+  X.fillStyle='rgba(0,0,0,.6)';X.fillText(boss.name,tx+3,cy+3);
+  X.fillStyle='#fff';X.fillText(boss.name,tx,cy);
+  const nw=Math.min(X.measureText(boss.name).width,380);
+  X.fillStyle=p.p;X.fillRect(tx,cy+12,nw,5);
+  if(st<55){
+    const pulse=0.5+0.5*Math.sin(timeT*.2);
+    X.fillStyle='rgba(255,90,90,'+(0.45+0.55*pulse)+')';
+    X.font='bold 26px ui-sans-serif,system-ui';
+    X.fillText('¡PREPÁRATE!',tx,cy+62);
+  }
+  X.textAlign='left';
 }
 
 /* ===== MUTE ICON / PAUSE OVERLAY ===== */
